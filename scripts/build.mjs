@@ -32,7 +32,7 @@ for (const token of requiredTokens) {
 await rm(distDir, { recursive: true, force: true });
 await mkdir(resolve(distDir, "downloads"), { recursive: true });
 
-const offlineName = "NIKKE_SR收藏品强化规划器.html";
+const offlineName = "NIKKE_SR.html";
 const indexPath = resolve(distDir, "index.html");
 const offlinePath = resolve(distDir, "downloads", offlineName);
 const checksum = createHash("sha256").update(html, "utf8").digest("hex");

@@ -17,7 +17,7 @@
 3. 完整运行`npm run check`。
 4. 创建并推送版本标签，例如`v1.0.0`。
 5. Release工作流生成并上传：
-   - `NIKKE_SR收藏品强化规划器.html`
+   - `NIKKE_SR.html`
    - `SHA256SUMS.txt`
 
 不要手工修改Release中的HTML；它必须从标签对应的源码构建。

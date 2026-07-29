@@ -29,7 +29,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: >
           gh release create "$GITHUB_REF_NAME"
-          "dist/downloads/NIKKE_SR收藏品强化规划器.html"
+          "dist/downloads/NIKKE_SR.html"
           "dist/downloads/SHA256SUMS.txt"
           --title "$GITHUB_REF_NAME"
           --generate-notes
