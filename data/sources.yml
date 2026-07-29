@@ -1,0 +1,47 @@
+version: 1
+verified_at: 2026-07-29
+confidence_levels:
+  primary: 游戏内或官方说明
+  established_guide: 多个长期维护攻略交叉一致
+  community: 社区记录，需要以游戏内复核
+
+sources:
+  - id: prydwen_collection_dolls
+    url: https://www.prydwen.gg/nikke/guides/collection-dolls/
+    confidence: established_guide
+    supports:
+      - 工具经验值
+      - 大成功率
+      - 强化节点
+  - id: prydwen_collection_intro
+    url: https://www.prydwen.gg/nikke/guides/collection-intro
+    confidence: established_guide
+    supports:
+      - R15转移到SR5路线
+      - 个人突袭箱子数量
+      - 其他材料来源边界
+  - id: gamewith_collection
+    url: https://gamewith.jp/nikke/article/show/451967
+    confidence: established_guide
+    supports:
+      - 工具经验值
+      - 各等级大成功率
+  - id: famitsu_collection
+    url: https://www.famitsu.com/article/202405/6561?page=1
+    confidence: established_guide
+    supports:
+      - 大成功跳节点
+      - 节点溢出经验清除
+  - id: nikke_gg_collection
+    url: https://nikke.gg/collection-item-guide-and-overview/
+    confidence: established_guide
+    supports:
+      - 个人突袭箱子数量
+      - 收藏品转移路线
+  - id: donoko_original_guide
+    url: https://www.bilibili.com/opus/943563529934340152
+    confidence: community
+    supports:
+      - 原表6比2比1近似方案
+
+publication_note: 本仓库未声称这些第三方攻略属于官方数据；关键参数更新时应优先以游戏内说明复核。

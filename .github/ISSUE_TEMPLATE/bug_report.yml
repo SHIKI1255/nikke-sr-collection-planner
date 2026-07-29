@@ -1,0 +1,32 @@
+name: 程序错误
+description: 报告页面操作、显示或计算异常
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: 问题描述
+      description: 请说明实际结果和预期结果。
+    validations:
+      required: true
+  - type: textarea
+    id: inputs
+    attributes:
+      label: 输入状态
+      description: 请提供等级、经验、目标节点、库存和保留库存。
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: 浏览器与设备
+      placeholder: Chrome 版本、Windows/Android/iOS等
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤
+    validations:
+      required: true

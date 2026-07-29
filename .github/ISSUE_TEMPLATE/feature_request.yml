@@ -1,0 +1,22 @@
+name: 功能建议
+description: 提议新的规划目标、展示或操作能力
+title: "[Feature] "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: 要解决的问题
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 建议方案
+    validations:
+      required: true
+  - type: textarea
+    id: boundary
+    attributes:
+      label: 对现有推荐逻辑的影响
+      description: 是否改变目标函数、数据输入或执行方式？

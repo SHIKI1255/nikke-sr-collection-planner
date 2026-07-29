@@ -1,0 +1,36 @@
+name: 数据修正
+description: 修正经验值、大成功率、箱子或其他游戏数据
+title: "[Data] "
+labels: ["data"]
+body:
+  - type: textarea
+    id: change
+    attributes:
+      label: 建议修正
+      description: 请列出旧值、新值和影响范围。
+    validations:
+      required: true
+  - type: input
+    id: source
+    attributes:
+      label: 来源
+      description: 游戏内说明、官方页面或可核对的URL。
+    validations:
+      required: true
+  - type: input
+    id: checked_at
+    attributes:
+      label: 核对日期
+      placeholder: YYYY-MM-DD
+    validations:
+      required: true
+  - type: dropdown
+    id: confidence
+    attributes:
+      label: 来源等级
+      options:
+        - 游戏内或官方直接确认
+        - 多个长期维护攻略交叉一致
+        - 单一攻略或社区记录
+    validations:
+      required: true

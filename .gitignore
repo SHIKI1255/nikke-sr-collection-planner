@@ -1,0 +1,9 @@
+node_modules/
+dist/
+test-results/
+playwright-report/
+blob-report/
+.cache/
+.DS_Store
+Thumbs.db
+*.log

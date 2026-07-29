@@ -1,0 +1,33 @@
+{
+  "scenario_id": "solo-raid-box-only",
+  "name": "个突箱子单一来源平衡场景",
+  "scope": "只计算个人突袭箱子，忽略派遣、协同作战、活动及其他来源。",
+  "boxes": {
+    "I": {
+      "count": 12,
+      "outcomes": [
+        { "material": "R", "probability": 0.8, "quantity": 3 },
+        { "material": "SR", "probability": 0.2, "quantity": 1 }
+      ]
+    },
+    "II": {
+      "count": 17,
+      "outcomes": [
+        { "material": "R", "probability": 0.7, "quantity": 5 },
+        { "material": "SR", "probability": 0.2, "quantity": 2 },
+        { "material": "SSR", "probability": 0.1, "quantity": 2 }
+      ]
+    }
+  },
+  "expected_groups_per_period": {
+    "R": 8.83,
+    "SR": 0.92,
+    "SSR": 0.34
+  },
+  "expected_plan_groups": {
+    "R": 50.36831173851833,
+    "SR": 5.24788751975503,
+    "SSR": 1.9394366920833799
+  },
+  "warning": "箱内数量和统计周期应以游戏内当前说明复核。"
+}

@@ -1,0 +1,20 @@
+{
+  "scenario_id": "default-example",
+  "name": "默认库存示例",
+  "description": "页面首次展示及“载入示例”按钮使用的演示库存。",
+  "stock": {
+    "R": 6000,
+    "SR": 2000,
+    "SSR": 1000
+  },
+  "reserve": {
+    "R": 0,
+    "SR": 0,
+    "SSR": 0
+  },
+  "start": {
+    "level": 0,
+    "exp": 0
+  },
+  "target": 15
+}

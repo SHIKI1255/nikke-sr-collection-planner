@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://shiki1255.github.io/nikke-sr-collection-planner/schemas/ruleset.schema.json",
+  "title": "NIKKE SR收藏品强化规则集",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "ruleset_id",
+    "verified_at",
+    "action_size",
+    "exp_per_level",
+    "milestones",
+    "materials"
+  ],
+  "properties": {
+    "schema_version": { "type": "integer", "minimum": 1 },
+    "ruleset_id": { "type": "string", "minLength": 1 },
+    "verified_at": { "type": "string", "format": "date" },
+    "action_size": { "type": "integer", "minimum": 1 },
+    "exp_per_level": { "type": "integer", "minimum": 1 },
+    "milestones": {
+      "type": "array",
+      "items": { "type": "integer" },
+      "minItems": 3,
+      "maxItems": 3
+    },
+    "materials": {
+      "type": "object",
+      "required": ["R", "SR", "SSR"],
+      "additionalProperties": false,
+      "patternProperties": {
+        "^(R|SR|SSR)$": {
+          "type": "object",
+          "required": ["exp_per_action", "success_rates"],
+          "properties": {
+            "exp_per_action": { "type": "integer", "minimum": 1 },
+            "success_rates": {
+              "type": "array",
+              "items": { "type": "number", "minimum": 0, "maximum": 1 },
+              "minItems": 15,
+              "maxItems": 15
+            }
+          }
+        }
+      }
+    }
+  }
+}

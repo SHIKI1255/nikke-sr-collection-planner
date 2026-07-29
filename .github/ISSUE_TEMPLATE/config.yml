@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 使用说明
+    url: https://github.com/SHIKI1255/nikke-sr-collection-planner/blob/main/docs/user_guide.md
+    about: 提问前请先查看等级、经验、库存与执行记录说明。
