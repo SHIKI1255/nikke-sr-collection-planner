@@ -7,6 +7,7 @@
 
 - 在线使用：[GitHub Pages](https://shiki1255.github.io/nikke-sr-collection-planner/)
 - 离线使用：[下载最新Release](https://github.com/SHIKI1255/nikke-sr-collection-planner/releases/latest)
+- 当前程序版本：`v1.1.0`
 - 当前数据基线：`2026-07-29`
 - 制作：B站UP主「努力学习的Gabriel」
 
@@ -45,15 +46,16 @@
 
 规则集与程序版本独立。游戏数据发生变化时，应新增或更新规则集、来源记录和回归基线，而不是只修改页面显示值。
 
+程序版本记录功能、界面和构建流程的变化；数据基线记录游戏内概率与强化规则的核对日期。完整版本记录见[`CHANGELOG.md`](CHANGELOG.md)。
+
 ## 本地验证
 
 需要Node.js 20或更高版本。
 
 ```bash
 npm ci
-npm test
 npx playwright install chromium
-npm run test:browser
+npm run check
 ```
 
 生成GitHub Pages和离线单文件成品：
@@ -81,8 +83,8 @@ npm run build
 
 ## 发布
 
-- `main`分支验证通过后自动部署GitHub Pages。
-- 推送`v*`标签后自动创建GitHub Release。
+- `main`分支通过数学、契约和真实浏览器测试后自动部署GitHub Pages。
+- 推送`v*`标签后，Release工作流会再次执行同等门禁并自动创建GitHub Release。
 - Release包含离线单文件HTML和SHA-256校验文件。
 
 详细流程见[`docs/release_process.md`](docs/release_process.md)。
