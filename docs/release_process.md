@@ -7,7 +7,7 @@
 1. 安装锁定依赖。
 2. 安装Playwright使用的Chromium。
 3. 运行数学、页面契约与真实浏览器测试；任一失败均停止部署。
-4. 按`tokens → base → components → responsive → print`顺序组装源码，并内联主题与应用脚本。
+4. 按`tokens → base → components → results → policy → responsive → print`顺序组装源码，并内联主题与应用脚本。
 5. 构建Pages与离线单文件，确认不存在外部脚本或样式依赖。
 6. 上传`dist/`为GitHub Pages产物。
 7. 部署到`github-pages`环境。
@@ -17,8 +17,9 @@
 1. 更新`CHANGELOG.md`和`package.json`版本。
 2. 确认数据基线是否变化。
 3. 完整运行`npm run check`；Release工作流会再次执行同等的数学、契约和真实浏览器门禁。
-4. 在合并后的`main`提交上创建并推送与程序版本一致的标签，例如`v1.1.0`。
-5. Release工作流生成并上传：
+4. 在合并后的`main`提交上创建并推送与程序版本一致的标签，例如`v1.2.0`。
+5. Release工作流会先验证标签与`package.json`版本完全一致，不一致则终止发布。
+6. Release工作流生成并上传：
    - `NIKKE_SR.html`
    - `SHA256SUMS.txt`
 

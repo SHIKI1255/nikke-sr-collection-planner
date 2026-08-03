@@ -18,6 +18,13 @@ jobs:
         with:
           node-version: 24
           cache: npm
+      - name: Verify release tag matches program version
+        run: |
+          EXPECTED_TAG="v$(node -p "require('./package.json').version")"
+          if [ "$GITHUB_REF_NAME" != "$EXPECTED_TAG" ]; then
+            echo "::error::Release tag $GITHUB_REF_NAME does not match program version $EXPECTED_TAG"
+            exit 1
+          fi
       - name: Install dependencies
         run: npm ci
       - name: Install Chromium

@@ -62,6 +62,8 @@ test("source is split into bounded, purpose-specific modules", async () => {
     "src/styles/tokens.css",
     "src/styles/base.css",
     "src/styles/components.css",
+    "src/styles/results.css",
+    "src/styles/policy.css",
     "src/styles/responsive.css",
     "src/styles/print.css",
   ]);
@@ -89,8 +91,11 @@ test("the template has one marker per inline source category", async () => {
 });
 
 test("normal component selectors have one canonical definition", async () => {
+  const normalStylePaths = sourceModules.styles.filter(
+    (path) => !path.endsWith("/responsive.css") && !path.endsWith("/print.css"),
+  );
   const normalStyles = await Promise.all(
-    sourceModules.styles.slice(0, 3).map((path) => readSource(path)),
+    normalStylePaths.map((path) => readSource(path)),
   );
   const selectors = normalStyles.flatMap(topLevelSelectors);
   const seen = new Set();
@@ -123,6 +128,8 @@ test("assembly produces one dependency-free standalone document", async () => {
       "tokens.css": ":root {",
       "base.css": "* { box-sizing: border-box; }",
       "components.css": ".workspace {",
+      "results.css": ".status-panel {",
+      "policy.css": ".policy-panel {",
       "responsive.css": "@media (max-width: 1040px)",
       "print.css": "@media print",
     };

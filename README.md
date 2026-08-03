@@ -7,7 +7,7 @@
 
 - 在线使用：[GitHub Pages](https://shiki1255.github.io/nikke-sr-collection-planner/)
 - 离线使用：[下载最新Release](https://github.com/SHIKI1255/nikke-sr-collection-planner/releases/latest)
-- 当前程序版本：`v1.1.0`
+- 当前程序版本：`v1.2.0`
 - 当前数据基线：`2026-07-29`
 - 制作：B站UP主「努力学习的Gabriel」
 
@@ -17,10 +17,11 @@
 - 支持当前等级、当前经验、目标等级和保留库存。
 - 计算当前可用库存下的预计可完成次数。
 - 显示当前建议使用及混合策略占比。
-- 提供圈、三角、叉形式的分阶段工具建议。
+- 按0–4级、5–9级、10–14级三个强化阶段提供圈、三角、叉形式的工具建议，并根据目标等级显示对应阶段。
 - 记录普通结果或大成功后，自动扣减库存并重新求解。
 - R、SR、SSR分别使用蓝、紫、金色语义，并同时提供浅色与深色视觉方案。
 - 主题可自动跟随系统，也可在页面右上角手动固定为浅色或深色。
+- 打印或另存PDF时保留计算条件、阶段标题、策略图标、数据基线和制作信息。
 - 支持完全离线运行，不上传库存或操作记录。
 
 ## 主题与颜色
@@ -73,7 +74,9 @@ npm run build
 - `src/index.html`：页面结构和内联位置模板。
 - `src/styles/tokens.css`：浅色、深色、字号、尺寸和语义变量。
 - `src/styles/base.css`：页面基础样式和顶部区域。
-- `src/styles/components.css`：表单、面板、结果、图标和表格组件。
+- `src/styles/components.css`：通用布局、面板与表单组件。
+- `src/styles/results.css`：计算结果、材料用量与强化记录组件。
+- `src/styles/policy.css`：阶段建议表、图标、计算说明、页脚与提示组件。
 - `src/styles/responsive.css`：`1040/720/380px`响应式与辅助功能规则。
 - `src/styles/print.css`：打印专用覆盖。
 - `src/scripts/theme-init.js`：首屏主题初始化。
