@@ -17,7 +17,7 @@
 1. 更新`CHANGELOG.md`和`package.json`版本。
 2. 确认数据基线是否变化。
 3. 完整运行`npm run check`；Release工作流会再次执行同等的数学、契约和真实浏览器门禁。
-4. 创建并推送版本标签，例如`v1.0.0`。
+4. 在合并后的`main`提交上创建并推送与程序版本一致的标签，例如`v1.1.0`。
 5. Release工作流生成并上传：
    - `NIKKE_SR.html`
    - `SHA256SUMS.txt`
