@@ -1,18 +1,18 @@
 import { createHash } from "node:crypto";
-import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdir, rm, writeFile } from "node:fs/promises";
 import { basename, dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { assembleHtml } from "./assemble.mjs";
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const root = resolve(scriptDir, "..");
-const sourcePath = resolve(root, "src", "index.html");
 const distDir = resolve(root, "dist");
 
 if (dirname(distDir) !== root || basename(distDir) !== "dist") {
   throw new Error("Refusing to build outside the repository dist directory.");
 }
 
-const html = await readFile(sourcePath, "utf8");
+const html = await assembleHtml(root);
 const requiredTokens = [
   "SR收藏品强化规划器",
   "2026-07-29",
