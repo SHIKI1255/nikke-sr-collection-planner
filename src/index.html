@@ -31,9 +31,19 @@
     </header>
 
     <div class="notice">
-      <span class="notice-icon">!</span>
+      <span class="notice-icon" aria-hidden="true">!</span>
       <span><b>结果按概率期望计算，不代表每次固定消耗。</b>大成功具有随机性，请在每次强化后记录实际结果并重新计算。</span>
     </div>
+
+    <section class="print-summary" aria-label="本次计算条件">
+      <h2>本次计算条件</h2>
+      <div class="print-summary-grid">
+        <div><span>当前状态</span><strong id="print-current-state">0级 / 0经验</strong></div>
+        <div><span>目标等级</span><strong id="print-target-level">15级</strong></div>
+        <div><span>工具库存</span><strong id="print-stock">R 6000个 / SR 2000个 / SSR 1000个</strong></div>
+        <div><span>保留库存</span><strong id="print-reserve">R 0个 / SR 0个 / SSR 0个</strong></div>
+      </div>
+    </section>
 
     <section class="workspace">
       <div class="left-column">
@@ -48,17 +58,17 @@
             <div class="inventory-grid">
               <div class="inventory-card r">
                 <label for="stock-r"><span class="material-pill">R</span><span>库存</span></label>
-                <input id="stock-r" data-testid="stock-r" type="number" min="0" max="999999" step="1" inputmode="numeric" value="6000">
+                <input id="stock-r" data-testid="stock-r" type="number" min="0" max="999999" step="1" inputmode="numeric" value="6000" aria-describedby="groups-r">
                 <div class="input-hint" id="groups-r">600组＋0个</div>
               </div>
               <div class="inventory-card sr">
                 <label for="stock-sr"><span class="material-pill">SR</span><span>库存</span></label>
-                <input id="stock-sr" data-testid="stock-sr" type="number" min="0" max="999999" step="1" inputmode="numeric" value="2000">
+                <input id="stock-sr" data-testid="stock-sr" type="number" min="0" max="999999" step="1" inputmode="numeric" value="2000" aria-describedby="groups-sr">
                 <div class="input-hint" id="groups-sr">200组＋0个</div>
               </div>
               <div class="inventory-card ssr">
                 <label for="stock-ssr"><span class="material-pill">SSR</span><span>库存</span></label>
-                <input id="stock-ssr" data-testid="stock-ssr" type="number" min="0" max="999999" step="1" inputmode="numeric" value="1000">
+                <input id="stock-ssr" data-testid="stock-ssr" type="number" min="0" max="999999" step="1" inputmode="numeric" value="1000" aria-describedby="groups-ssr">
                 <div class="input-hint" id="groups-ssr">100组＋0个</div>
               </div>
             </div>
@@ -87,9 +97,9 @@
             <details class="advanced">
               <summary>高级设置：保留库存（不参与规划）</summary>
               <div class="reserve-grid">
-                <label>R保留<input id="reserve-r" type="number" min="0" step="1" value="0"></label>
-                <label>SR保留<input id="reserve-sr" type="number" min="0" step="1" value="0"></label>
-                <label>SSR保留<input id="reserve-ssr" type="number" min="0" step="1" value="0"></label>
+                <label>R保留<input id="reserve-r" type="number" min="0" step="1" inputmode="numeric" value="0"></label>
+                <label>SR保留<input id="reserve-sr" type="number" min="0" step="1" inputmode="numeric" value="0"></label>
+                <label>SSR保留<input id="reserve-ssr" type="number" min="0" step="1" inputmode="numeric" value="0"></label>
               </div>
             </details>
 
@@ -196,12 +206,13 @@
           <p>按当前库存生成；实际操作以上方“当前建议使用”为准</p>
         </div>
         <div class="legend" aria-label="符号说明">
-          <span class="legend-item"><i class="mark circle" aria-hidden="true"></i>主用</span>
-          <span class="legend-item"><i class="mark triangle" aria-hidden="true"></i>混合/次选</span>
-          <span class="legend-item"><i class="mark cross" aria-hidden="true"></i>不建议</span>
+          <span class="legend-item"><i class="mark circle" aria-hidden="true"><svg class="print-mark" viewBox="0 0 24 24" focusable="false"><circle cx="12" cy="12" r="9.5" fill="none" stroke="currentColor" stroke-width="3"/></svg></i>主用</span>
+          <span class="legend-item"><i class="mark triangle" aria-hidden="true"><svg class="print-mark" viewBox="0 0 24 24" focusable="false"><path d="M12 2.5L22 21H2Z" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/></svg></i>混合/次选</span>
+          <span class="legend-item"><i class="mark cross" aria-hidden="true"><svg class="print-mark" viewBox="0 0 24 24" focusable="false"><path d="M4 4L20 20M20 4L4 20" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg></i>不建议</span>
         </div>
       </header>
-      <div class="policy-tables" id="policy-tables" data-testid="policy-tables">
+      <div class="policy-tables" id="policy-tables" data-testid="policy-tables" data-stage-count="3">
+        <div class="table-wrap"><div class="table-empty">等待计算</div></div>
         <div class="table-wrap"><div class="table-empty">等待计算</div></div>
         <div class="table-wrap"><div class="table-empty">等待计算</div></div>
       </div>

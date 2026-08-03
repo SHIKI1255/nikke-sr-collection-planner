@@ -57,7 +57,7 @@ test("records a normal result and can undo it", async ({ page }) => {
   await page.click("#record-normal");
   await expect(page.locator("#stock-r")).toHaveValue("5990");
   await expect(page.locator("#current-exp")).toHaveValue("200");
-  await expect(page.locator("#history-list")).toContainText("Lv0/0 → Lv0/200");
+  await expect(page.locator("#history-list")).toContainText("0级/0经验 → 0级/200经验");
 
   await page.click("#undo");
   await expect(page.locator("#stock-r")).toHaveValue("6000");
@@ -95,14 +95,141 @@ test("canonical responsive breakpoints switch at 720px and 1040px", async ({ pag
         workspace: countColumns(".workspace"),
         state: countColumns(".state-grid"),
         status: countColumns(".status-top"),
+        policy: countColumns(".policy-tables"),
       };
     });
   }
 
-  expect(await columnCounts(720)).toEqual({ workspace: 1, state: 1, status: 1 });
-  expect(await columnCounts(721)).toEqual({ workspace: 1, state: 3, status: 2 });
+  expect(await columnCounts(720)).toEqual({ workspace: 1, state: 1, status: 1, policy: 1 });
+  expect(await columnCounts(721)).toEqual({ workspace: 1, state: 3, status: 2, policy: 1 });
   expect((await columnCounts(1040)).workspace).toBe(1);
-  expect((await columnCounts(1041)).workspace).toBe(2);
+  expect(await columnCounts(1040)).toMatchObject({ workspace: 1, policy: 1 });
+  expect(await columnCounts(1041)).toMatchObject({ workspace: 2, policy: 3 });
+});
+
+test("policy tables follow the 5, 10 and 15 milestone ranges", async ({ page }) => {
+  async function expectStages(target, expectedCaptions) {
+    await page.setViewportSize({ width: 1280, height: 844 });
+    await page.selectOption("#target-level", String(target));
+    await page.click("#calculate");
+    await expect(page.locator("#policy-tables .table-wrap")).toHaveCount(expectedCaptions.length);
+    await expect(page.locator("#policy-tables caption")).toHaveText(expectedCaptions);
+    await expect(page.locator("#policy-tables")).toHaveAttribute("data-stage-count", String(expectedCaptions.length));
+    const columns = await page.locator("#policy-tables").evaluate((element) => (
+      getComputedStyle(element).gridTemplateColumns.split(" ").filter(Boolean).length
+    ));
+    expect(columns).toBe(expectedCaptions.length);
+  }
+
+  await expectStages(5, ["0–4级强化至5级"]);
+  await expectStages(10, ["0–4级强化至5级", "5–9级强化至10级"]);
+  await expectStages(15, ["0–4级强化至5级", "5–9级强化至10级", "10–14级强化至15级"]);
+});
+
+test("print mode keeps strategy symbols visible and stages intact", async ({ page }) => {
+  await page.emulateMedia({ media: "print" });
+
+  const printState = await page.evaluate(() => {
+    const tables = document.querySelector(".policy-tables");
+    const wrapper = document.querySelector(".table-wrap");
+    const mark = document.querySelector(".policy-table .mark");
+    const printMark = mark.querySelector(".print-mark");
+    const printSummary = document.querySelector(".print-summary");
+    const footer = document.querySelector("footer.page-footer");
+    return {
+      tableDisplay: getComputedStyle(tables).display,
+      wrapperBreak: getComputedStyle(wrapper).breakInside,
+      screenGlyphDisplay: getComputedStyle(mark, "::before").display,
+      printGlyphDisplay: getComputedStyle(printMark).display,
+      printGlyphTag: printMark.tagName,
+      printGlyphViewBox: printMark.getAttribute("viewBox"),
+      printSummaryDisplay: getComputedStyle(printSummary).display,
+      printSummaryText: printSummary.textContent,
+      footerDisplay: getComputedStyle(footer).display,
+      printColorAdjust: getComputedStyle(document.documentElement).printColorAdjust,
+    };
+  });
+
+  expect(printState.tableDisplay).toBe("block");
+  expect(printState.wrapperBreak).toBe("avoid");
+  expect(printState.screenGlyphDisplay).toBe("none");
+  expect(printState.printGlyphDisplay).toBe("block");
+  expect(printState.printGlyphTag).toBe("svg");
+  expect(printState.printGlyphViewBox).toBe("0 0 24 24");
+  expect(printState.printSummaryDisplay).toBe("block");
+  expect(printState.printSummaryText).toContain("R 6000个 / SR 2000个 / SSR 1000个");
+  expect(printState.footerDisplay).toBe("block");
+  expect(printState.printColorAdjust).toBe("exact");
+});
+
+test("panel rhythm and advanced controls follow the shared VI geometry", async ({ page }) => {
+  const geometry = await page.evaluate(() => {
+    const status = document.querySelector(".status-panel").getBoundingClientRect();
+    const result = document.querySelector(".right-column > .panel").getBoundingClientRect();
+    const statusStyles = getComputedStyle(document.querySelector(".status-panel"));
+    const reserveStyles = getComputedStyle(document.querySelector("#reserve-r"));
+    const advancedSummary = document.querySelector("details.advanced summary").getBoundingClientRect();
+    const undoStyles = getComputedStyle(document.querySelector("#undo"));
+    return {
+      gap: result.top - status.bottom,
+      statusPaddingLeft: statusStyles.paddingLeft,
+      statusBorderLeft: statusStyles.borderLeftWidth,
+      reserveHeight: reserveStyles.height,
+      reserveRadius: reserveStyles.borderRadius,
+      reserveWeight: reserveStyles.fontWeight,
+      advancedSummaryHeight: advancedSummary.height,
+      undoCursor: undoStyles.cursor,
+    };
+  });
+
+  expect(geometry.gap).toBe(14);
+  expect(geometry.statusPaddingLeft).toBe("17px");
+  expect(geometry.statusBorderLeft).toBe("1px");
+  expect(geometry.reserveHeight).toBe("44px");
+  expect(geometry.reserveRadius).toBe("9px");
+  expect(geometry.reserveWeight).toBe("700");
+  expect(geometry.advancedSummaryHeight).toBe(44);
+  expect(geometry.undoCursor).toBe("not-allowed");
+  await expect(page.locator("#calculate")).toHaveAttribute("aria-busy", "false");
+});
+
+test("all visible controls and disclosure summaries meet the 44px target size", async ({ page }) => {
+  await page.locator("details.advanced > summary").click();
+  const targets = await page
+    .locator("button:visible, input:visible, select:visible, summary:visible")
+    .evaluateAll((elements) => elements.map((element) => {
+      const box = element.getBoundingClientRect();
+      return {
+        name: element.id || element.textContent.trim(),
+        width: box.width,
+        height: box.height,
+      };
+    }));
+
+  expect(targets.length).toBeGreaterThan(0);
+  expect(targets.filter(({ width, height }) => width < 44 || height < 44)).toEqual([]);
+});
+
+test("major sections share exact column and full-width boundaries", async ({ page }) => {
+  const alignment = await page.evaluate(() => {
+    const spread = (selector, edge) => {
+      const values = [...document.querySelectorAll(selector)]
+        .map((element) => element.getBoundingClientRect()[edge]);
+      return Math.max(...values) - Math.min(...values);
+    };
+    return {
+      leftColumnLeft: spread(".left-column > .panel", "left"),
+      leftColumnRight: spread(".left-column > .panel", "right"),
+      rightColumnLeft: spread(".right-column > *", "left"),
+      rightColumnRight: spread(".right-column > *", "right"),
+      fullWidthLeft: spread(".policy-panel, .method-panel, .page-footer", "left"),
+      fullWidthRight: spread(".policy-panel, .method-panel, .page-footer", "right"),
+    };
+  });
+
+  for (const difference of Object.values(alignment)) {
+    expect(difference).toBeLessThanOrEqual(0.1);
+  }
 });
 
 test("status icons use identical vector geometry", async ({ page }) => {

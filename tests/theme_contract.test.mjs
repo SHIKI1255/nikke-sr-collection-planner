@@ -81,4 +81,10 @@ test("print styling forces readable light surfaces and hides theme controls", ()
   assert.match(html, /@media print[\s\S]+html\[data-theme="dark"\][\s\S]+color-scheme: light/);
   assert.match(html, /\.theme-switcher, \.button, \.progress-line \{ display: none !important; \}/);
   assert.match(html, /\.status-panel \{ border: 1px solid var\(--line\); background: #ffffff; color: var\(--ink\); \}/);
+  assert.match(html, /print-color-adjust: exact;/);
+  assert.match(html, /\.policy-tables \{ display: block; padding: 10px 0 0; \}/);
+  assert.match(html, /\.table-wrap \{[\s\S]+break-inside: avoid;[\s\S]+page-break-inside: avoid;/);
+  assert.match(html, /\.mark::before \{ display: none; \}[\s\S]+\.print-mark \{[\s\S]+display: block;/);
+  assert.match(html, /\.print-summary \{[\s\S]+display: block;[\s\S]+break-inside: avoid;/);
+  assert.match(html, /footer\.page-footer \{[\s\S]+display: block;[\s\S]+break-inside: avoid;/);
 });

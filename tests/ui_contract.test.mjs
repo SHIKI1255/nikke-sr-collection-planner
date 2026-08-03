@@ -40,6 +40,9 @@ test("circle, triangle and cross share one vector icon geometry", () => {
   assert.match(styles, /\.mark\.triangle[\s\S]*?--mark-mask:/);
   assert.match(styles, /\.mark\.cross[\s\S]*?--mark-mask:/);
   assert.doesNotMatch(styles, /content:\s*"△"/);
+  assert.match(styles, /\.print-mark\s*\{[\s\S]*?width: var\(--size-status-icon\);[\s\S]*?height: var\(--size-status-icon\);/);
+  assert.equal((html.match(/<svg class="print-mark" viewBox="0 0 24 24"/g) || []).length, 4);
+  assert.doesNotMatch(html, /class="print-mark"[^>]*>[○△×]/);
 });
 
 test("select controls reserve space for a consistent custom arrow", () => {
@@ -62,6 +65,8 @@ test("interactive components share measurable sizing tokens", () => {
   assert.match(styles, /\.button\s*\{[\s\S]*?min-height: var\(--size-control\);/);
   assert.match(styles, /\.button\.primary\s*\{[\s\S]*?min-height: var\(--size-control-primary\);/);
   assert.match(styles, /\.theme-option\s*\{[\s\S]*?min-height: var\(--size-control\);/);
+  assert.match(styles, /details\.advanced summary\s*\{[\s\S]*?min-height: var\(--size-control\);/);
+  assert.match(styles, /\.reserve-grid input\s*\{[\s\S]*?height: var\(--size-control\);[\s\S]*?border-radius: var\(--radius-control\);/);
   assert.doesNotMatch(styles, /min-height:\s*(?:40|42|44|47|50)px/);
 });
 
@@ -84,6 +89,8 @@ test("top-level panels share one layout rhythm", () => {
   assert.match(styles, /\.method-panel details\s*\{[\s\S]*?border-radius: var\(--radius-panel\);/);
   assert.match(styles, /\.panel-header\s*\{[\s\S]*?padding: 15px var\(--padding-panel-inline\);/);
   assert.match(styles, /\.panel-body\s*\{\s*padding: 16px var\(--padding-panel-inline\) 18px;\s*\}/);
+  assert.match(styles, /\.status-panel \+ \.panel \{ margin-top: var\(--space-stack\); \}/);
+  assert.match(styles, /\.status-panel\s*\{[\s\S]*?padding: 19px var\(--padding-panel-inline\);[\s\S]*?border: 1px solid transparent;/);
   assert.doesNotMatch(styles, /border-radius:\s*(?:15|17)px/);
 });
 
@@ -99,4 +106,11 @@ test("semantic emphasis maps to the documented VI weight scale", () => {
   assert.match(styles, /\.capacity strong\s*\{[\s\S]*?font-weight: var\(--weight-heavy\);/);
   assert.match(styles, /\.bottleneck strong\s*\{[\s\S]*?font-weight: var\(--weight-heavy\);/);
   assert.doesNotMatch(styles, /font-weight:\s*(?:500|800|900);/);
+});
+
+test("number and disabled controls use consistent native-independent states", () => {
+  assert.match(styles, /input\[type="number"\]\s*\{[\s\S]*?appearance: textfield;/);
+  assert.match(styles, /::-webkit-inner-spin-button,[\s\S]*?::-webkit-outer-spin-button[\s\S]*?-webkit-appearance: none;/);
+  assert.match(styles, /\.button:disabled \{ cursor: not-allowed;/);
+  assert.match(styles, /\.button\[aria-busy="true"\] \{ cursor: wait; \}/);
 });

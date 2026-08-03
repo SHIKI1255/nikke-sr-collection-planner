@@ -11,6 +11,8 @@ export const sourceModules = Object.freeze({
     "src/styles/tokens.css",
     "src/styles/base.css",
     "src/styles/components.css",
+    "src/styles/results.css",
+    "src/styles/policy.css",
     "src/styles/responsive.css",
     "src/styles/print.css",
   ],

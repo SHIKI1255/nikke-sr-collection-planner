@@ -3,6 +3,11 @@
     "use strict";
 
     const MATERIALS = ["R", "SR", "SSR"];
+    const POLICY_STAGES = [
+      { start: 0, end: 4, goal: 5 },
+      { start: 5, end: 9, goal: 10 },
+      { start: 10, end: 14, goal: 15 },
+    ];
     const GAINS = { R: 200, SR: 500, SSR: 1000 };
     const SUCCESS = {
       R:   [0.036, 0.059, 0.078, 0.113, 0.150, 0.022, 0.033, 0.049, 0.076, 0.125, 0.012, 0.022, 0.031, 0.047, 0.100],
@@ -524,6 +529,10 @@
 
     function renderCurrentResult(inputs, solution) {
       currentSolution = { inputs, solution };
+      els.printCurrentState.textContent = `${inputs.start.level}级 / ${inputs.start.exp}经验`;
+      els.printTargetLevel.textContent = `${inputs.target}级`;
+      els.printStock.textContent = MATERIALS.map((material) => `${material} ${inputs.stock[material]}个`).join(" / ");
+      els.printReserve.textContent = MATERIALS.map((material) => `${material} ${inputs.reserve[material]}个`).join(" / ");
       const capacity = solution.unit;
       if (capacity === Infinity) {
         els.capacityValue.textContent = "已达成";
@@ -603,10 +612,16 @@
     function markHtml(mark, probability = 0) {
       const label = mark === "circle" ? "主用" : mark === "triangle" ? "混合/次选" : "不建议";
       const title = probability > 0.002 ? `${label}，策略占比${formatProbability(probability)}` : label;
-      return `<span class="mark ${mark}" role="img" aria-label="${label}" title="${title}"></span>`;
+      const shape = mark === "circle"
+        ? '<circle cx="12" cy="12" r="9.5" fill="none" stroke="currentColor" stroke-width="3"/>'
+        : mark === "triangle"
+          ? '<path d="M12 2.5L22 21H2Z" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/>'
+          : '<path d="M4 4L20 20M20 4L4 20" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>';
+      return `<span class="mark ${mark}" role="img" aria-label="${title}" title="${title}"><svg class="print-mark" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${shape}</svg></span>`;
     }
 
-    function renderPolicyTable(policyMap, startLevel, endLevel, target) {
+    function renderPolicyTable(policyMap, stage, target) {
+      const { start: startLevel, end: endLevel, goal } = stage;
       const rows = [];
       for (let level = startLevel; level <= endLevel && level < target; level += 1) {
         [0, 1000, 2000].forEach((exp, index) => {
@@ -625,8 +640,9 @@
       if (!rows.length) {
         return '<div class="table-empty">所选目标等级没有可展示的阶段</div>';
       }
-      return `<table class="policy-table">
-        <thead><tr><th>等级</th><th>经验</th><th class="r-head">R</th><th class="sr-head">SR</th><th class="ssr-head">SSR</th></tr></thead>
+      return `<table class="policy-table" aria-label="${startLevel}至${endLevel}级强化工具建议">
+        <caption><span>${startLevel}–${endLevel}级</span><small>强化至${goal}级</small></caption>
+        <thead><tr><th scope="col">等级</th><th scope="col">经验</th><th class="r-head" scope="col">R</th><th class="sr-head" scope="col">SR</th><th class="ssr-head" scope="col">SSR</th></tr></thead>
         <tbody>${rows.join("")}</tbody>
       </table>`;
     }
@@ -670,9 +686,11 @@
 
         const policyMap = await buildPolicyMap(inputs, token);
         if (!policyMap || token !== calculationToken) return;
-        els.policyTables.innerHTML = `
-          <div class="table-wrap">${renderPolicyTable(policyMap, 0, 7, inputs.target)}</div>
-          <div class="table-wrap">${renderPolicyTable(policyMap, 8, 14, inputs.target)}</div>`;
+        const visibleStages = POLICY_STAGES.filter((stage) => stage.start < inputs.target);
+        els.policyTables.dataset.stageCount = String(visibleStages.length);
+        els.policyTables.innerHTML = visibleStages
+          .map((stage) => `<div class="table-wrap">${renderPolicyTable(policyMap, stage, inputs.target)}</div>`)
+          .join("");
         els.progressText.textContent = "分阶段工具建议已生成";
         saveState(inputs);
         document.documentElement.dataset.status = "ready";
@@ -687,6 +705,7 @@
 
     function setBusy(busy, text = "") {
       els.calculate.disabled = busy;
+      els.calculate.setAttribute("aria-busy", String(busy));
       els.progressLine.classList.toggle("active", busy);
       if (text) els.progressText.textContent = text;
     }
@@ -755,7 +774,7 @@
       }
       const inputs = getInputs();
       if (inputs.start.level >= inputs.target) {
-        showToast("当前等级已达到所选目标");
+        showToast("当前等级已达到所选目标，请调整目标等级或当前状态");
         return;
       }
       stockInput.value = stock - 10;
@@ -786,7 +805,7 @@
         const resultText = item.outcome === "success" ? "大成功" : "普通结果";
         return `<div class="history-item">
           <span>${item.material} · ${resultText}</span>
-          <span>Lv${item.from.level}/${item.from.exp} → Lv${item.to.level}/${item.to.exp}</span>
+          <span>${item.from.level}级/${item.from.exp}经验 → ${item.to.level}级/${item.to.exp}经验</span>
         </div>`;
       }).join("");
     }
@@ -823,6 +842,8 @@
         capacityValue: byId("capacity-value"), capacityUnit: byId("capacity-unit"), capacityNote: byId("capacity-note"),
         recommendMaterial: byId("recommend-material"), recommendDetail: byId("recommend-detail"),
         actualMaterial: byId("actual-material"), policyTables: byId("policy-tables"),
+        printCurrentState: byId("print-current-state"), printTargetLevel: byId("print-target-level"),
+        printStock: byId("print-stock"), printReserve: byId("print-reserve"),
         bottleneckValue: byId("bottleneck-value"), wholeCompletions: byId("whole-completions"),
         shortageAlert: byId("shortage-alert"), historyList: byId("history-list"),
         undo: byId("undo"), toast: byId("toast"),

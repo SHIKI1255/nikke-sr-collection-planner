@@ -24,3 +24,13 @@ test("CI, Pages and Release all enforce the browser publishing gate", async () =
     }
   }
 });
+
+test("Release rejects a tag that differs from the program version", async () => {
+  const workflow = await readWorkflow("release");
+  const tagGate = workflow.indexOf("EXPECTED_TAG=");
+  const publishStep = workflow.indexOf("gh release create");
+
+  assert.match(workflow, /EXPECTED_TAG="v\$\(node -p .*package\.json.*\)"/);
+  assert.match(workflow, /GITHUB_REF_NAME.*EXPECTED_TAG/);
+  assert.ok(tagGate >= 0 && tagGate < publishStep, "Release must validate its tag before publishing");
+});
