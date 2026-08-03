@@ -1,0 +1,108 @@
+@media (max-width: 1040px) {
+  .workspace { grid-template-columns: 1fr; }
+  .left-column { display: block; }
+  .left-column .panel + .panel { margin-top: var(--space-stack); }
+}
+
+@media (max-width: 720px) {
+  .app-shell {
+    width: min(100% - 24px, var(--layout-content-max));
+    padding-top: 16px;
+  }
+
+  .hero {
+    grid-template-columns: 1fr;
+    gap: 14px;
+    align-items: start;
+  }
+
+  h1 { font-size: var(--font-display-mobile); }
+  .hero-copy { font-size: var(--font-base); }
+  .hero-topline { align-items: center; }
+
+  .theme-switcher {
+    grid-template-columns: repeat(3, minmax(48px, auto));
+  }
+
+  .theme-option {
+    min-height: var(--size-control);
+    padding-inline: 9px;
+  }
+
+  .notice { line-height: var(--leading-normal); }
+  .panel-header { padding: 14px var(--padding-panel-inline-mobile); }
+  .panel-body { padding: 14px var(--padding-panel-inline-mobile) 16px; }
+
+  .inventory-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .inventory-card {
+    min-width: 0;
+    padding: 10px 8px 9px;
+  }
+
+  .inventory-card label { font-size: var(--font-xs); }
+  .inventory-card label > span:last-child { display: none; }
+  .inventory-card input { padding-inline: 6px; font-size: var(--font-xl); }
+  .input-hint { font-size: var(--font-xs); }
+
+  .state-grid, .result-grid { grid-template-columns: 1fr; }
+  .reserve-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .status-top { grid-template-columns: 1fr; }
+
+  .execution-grid { grid-template-columns: 1fr 1fr; }
+  .execution-grid .field { grid-column: 1 / -1; }
+  .execution-grid #undo { grid-column: 1 / -1; }
+
+  .policy-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .legend {
+    width: 100%;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .policy-tables { grid-template-columns: 1fr; padding: 10px; }
+  .method-copy { grid-template-columns: 1fr; }
+
+  footer.page-footer {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .footer-credit { text-align: left; }
+}
+
+@media (max-width: 380px) {
+  .app-shell { width: min(100% - 16px, var(--layout-content-max)); }
+  .hero-topline { align-items: flex-start; }
+  .theme-switcher { grid-template-columns: repeat(3, 44px); }
+  .theme-option { padding-inline: 5px; font-size: var(--font-xs); }
+  .inventory-card { padding-inline: 6px; }
+  .material-pill { min-width: 31px; padding-inline: 6px; }
+  .reserve-grid { grid-template-columns: 1fr; }
+  .legend { font-size: var(--font-xs); }
+  .policy-table th, .policy-table td { padding-inline: 2px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+@media (forced-colors: active) {
+  .field select {
+    appearance: auto;
+    padding-right: 12px;
+    background-image: none;
+  }
+}

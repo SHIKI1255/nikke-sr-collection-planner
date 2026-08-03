@@ -1,0 +1,40 @@
+@media print {
+  :root,
+  html[data-theme="dark"] {
+    color-scheme: light;
+    --bg: #ffffff;
+    --bg-top: #ffffff;
+    --paper: #ffffff;
+    --paper-soft: #f7f8fa;
+    --paper-subtle: #fafbfd;
+    --ink: #152235;
+    --text-secondary: #596579;
+    --muted: #647184;
+    --line: #dce2e9;
+    --navy-soft: #eaf2f8;
+    --info: #476d94;
+    --r: #37b7f4;
+    --r-ink: #086a9f;
+    --r-soft: #eaf8ff;
+    --sr: #b03bed;
+    --sr-ink: #73229e;
+    --sr-soft: #f6ecff;
+    --ssr: #f2b637;
+    --ssr-ink: #8a5b00;
+    --ssr-soft: #fff4d6;
+  }
+
+  body { background: #ffffff; }
+  .app-shell { width: 100%; padding: 0; }
+  .notice, .left-column, .execution-panel, .method-panel, .page-footer,
+  .theme-switcher, .button, .progress-line { display: none !important; }
+  .workspace { display: block; }
+  .status-panel, .panel { box-shadow: none; break-inside: avoid; }
+  .status-panel { border: 1px solid var(--line); background: #ffffff; color: var(--ink); }
+  .status-label, .capacity span, .capacity-note, .recommend-box small, .recommend-detail {
+    color: var(--text-secondary);
+  }
+  .recommend-box { border-color: var(--line); background: var(--paper-soft); }
+  .recommend-material { background: var(--navy-soft); color: var(--navy-dark); }
+  .policy-panel { margin-top: 12px; }
+}

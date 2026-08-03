@@ -1,0 +1,151 @@
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import test from "node:test";
+import { assembleHtml, projectRoot, sourceModules } from "../scripts/assemble.mjs";
+import { resolve } from "node:path";
+
+async function readSource(path) {
+  return readFile(resolve(projectRoot, path), "utf8");
+}
+
+function topLevelSelectors(css) {
+  const selectors = [];
+  let depth = 0;
+  let segmentStart = 0;
+  let quote = "";
+  let inComment = false;
+
+  for (let index = 0; index < css.length; index += 1) {
+    const char = css[index];
+    const next = css[index + 1];
+
+    if (inComment) {
+      if (char === "*" && next === "/") {
+        inComment = false;
+        index += 1;
+      }
+      continue;
+    }
+    if (!quote && char === "/" && next === "*") {
+      inComment = true;
+      index += 1;
+      continue;
+    }
+    if (quote) {
+      if (char === "\\") index += 1;
+      else if (char === quote) quote = "";
+      continue;
+    }
+    if (char === '"' || char === "'") {
+      quote = char;
+      continue;
+    }
+    if (char === "{") {
+      if (depth === 0) {
+        const selector = css.slice(segmentStart, index).trim().replace(/\s+/g, " ");
+        if (selector && !selector.startsWith("@")) selectors.push(selector);
+      }
+      depth += 1;
+    } else if (char === "}") {
+      depth -= 1;
+      if (depth === 0) segmentStart = index + 1;
+      assert.ok(depth >= 0, "CSS closes more blocks than it opens");
+    }
+  }
+
+  assert.equal(depth, 0, "CSS must have balanced blocks");
+  return selectors;
+}
+
+test("source is split into bounded, purpose-specific modules", async () => {
+  assert.deepEqual(sourceModules.styles, [
+    "src/styles/tokens.css",
+    "src/styles/base.css",
+    "src/styles/components.css",
+    "src/styles/responsive.css",
+    "src/styles/print.css",
+  ]);
+
+  const expectedLimits = new Map([
+    [sourceModules.template, 400],
+    [sourceModules.themeInit, 100],
+    [sourceModules.app, 1000],
+    ...sourceModules.styles.map((path) => [path, 800]),
+  ]);
+
+  for (const [path, maximumLines] of expectedLimits) {
+    const source = await readSource(path);
+    const lines = source.trimEnd().split("\n").length;
+    assert.ok(lines <= maximumLines, `${path} has ${lines} lines; expected at most ${maximumLines}`);
+  }
+});
+
+test("the template has one marker per inline source category", async () => {
+  const template = await readSource(sourceModules.template);
+  assert.equal((template.match(/@inline theme-init/g) || []).length, 1);
+  assert.equal((template.match(/@inline styles/g) || []).length, 1);
+  assert.equal((template.match(/@inline app/g) || []).length, 1);
+  assert.doesNotMatch(template, /window\.__SR_CALCULATOR__|--font-base|\.workspace\s*\{/);
+});
+
+test("normal component selectors have one canonical definition", async () => {
+  const normalStyles = await Promise.all(
+    sourceModules.styles.slice(0, 3).map((path) => readSource(path)),
+  );
+  const selectors = normalStyles.flatMap(topLevelSelectors);
+  const seen = new Set();
+  const duplicates = new Set();
+  for (const selector of selectors) {
+    if (seen.has(selector)) duplicates.add(selector);
+    seen.add(selector);
+  }
+  assert.deepEqual([...duplicates], []);
+});
+
+test("responsive CSS uses one documented breakpoint system", async () => {
+  const responsive = await readSource("src/styles/responsive.css");
+  assert.equal((responsive.match(/max-width:\s*1040px/g) || []).length, 1);
+  assert.equal((responsive.match(/max-width:\s*720px/g) || []).length, 1);
+  assert.equal((responsive.match(/max-width:\s*380px/g) || []).length, 1);
+  assert.doesNotMatch(responsive, /max-width:\s*760px|Public preview/);
+});
+
+test("assembly produces one dependency-free standalone document", async () => {
+  const html = await assembleHtml();
+  assert.equal((html.match(/<style>/g) || []).length, 1);
+  assert.equal((html.match(/<script>/g) || []).length, 2);
+  assert.doesNotMatch(html, /@inline (?:styles|theme-init|app)/);
+  assert.doesNotMatch(html, /<script\b[^>]*\bsrc\s*=|<link\b[^>]*\brel\s*=\s*["']stylesheet/i);
+
+  const positions = sourceModules.styles.map((path) => {
+    const name = path.split("/").at(-1);
+    const signatures = {
+      "tokens.css": ":root {",
+      "base.css": "* { box-sizing: border-box; }",
+      "components.css": ".workspace {",
+      "responsive.css": "@media (max-width: 1040px)",
+      "print.css": "@media print",
+    };
+    return html.indexOf(signatures[name]);
+  });
+  assert.ok(positions.every((position) => position >= 0));
+  assert.deepEqual([...positions].sort((a, b) => a - b), positions);
+});
+
+test("public API and local state keys stay in the isolated application module", async () => {
+  const app = await readSource(sourceModules.app);
+  assert.match(app, /window\.__SR_CALCULATOR__\s*=\s*\{/);
+  for (const apiName of [
+    "solveMaxUnits",
+    "solveMinShortage",
+    "solveScenario",
+    "normalTransition",
+    "successTransition",
+    "getInputs",
+    "calculate",
+  ]) {
+    assert.match(app, new RegExp(`\\b${apiName},`));
+  }
+  assert.match(app, /nikke-sr-inventory-calculator-v1/);
+  assert.match(app, /nikke-sr-theme-v1/);
+});
