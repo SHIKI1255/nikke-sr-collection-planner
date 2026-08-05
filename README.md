@@ -1,15 +1,18 @@
 # NIKKE SR收藏品强化规划器
 
+[简体中文](README.md) | [English](README.en.md)
+
 [![CI](https://github.com/SHIKI1255/nikke-sr-collection-planner/actions/workflows/ci.yml/badge.svg)](https://github.com/SHIKI1255/nikke-sr-collection-planner/actions/workflows/ci.yml)
 [![Pages](https://github.com/SHIKI1255/nikke-sr-collection-planner/actions/workflows/pages.yml/badge.svg)](https://github.com/SHIKI1255/nikke-sr-collection-planner/actions/workflows/pages.yml)
 
-一个完全在浏览器本地运行的NIKKE SR收藏品强化规划工具。输入当前等级、经验以及R、SR、SSR保养工具库存后，计算器会给出建议使用顺序和预计平均消耗，并在每次记录普通结果或大成功后重新规划。
+一个完全在浏览器本地运行的NIKKE SR收藏品强化规划工具。输入当前等级、经验以及R、SR、SSR保养工具库存后，规划器会生成建议使用策略，估算达到目标的平均消耗，并在每次记录普通结果或大成功后自动重新规划。
 
-- 在线使用：[GitHub Pages](https://shiki1255.github.io/nikke-sr-collection-planner/)
+- 在线使用（中文）：[GitHub Pages](https://shiki1255.github.io/nikke-sr-collection-planner/)
+- Online (English): [English Page](https://shiki1255.github.io/nikke-sr-collection-planner/en/)
 - 离线使用：[下载最新Release](https://github.com/SHIKI1255/nikke-sr-collection-planner/releases/latest)
-- 当前程序版本：`v1.2.0`
+- 当前程序版本：`v1.3.0`
 - 当前数据基线：`2026-07-29`
-- 制作：B站UP主「努力学习的Gabriel」
+- 制作：[SHIKI1255](https://github.com/SHIKI1255)
 
 ## 功能
 
@@ -22,7 +25,14 @@
 - R、SR、SSR分别使用蓝、紫、金色语义，并同时提供浅色与深色视觉方案。
 - 主题可自动跟随系统，也可在页面右上角手动固定为浅色或深色。
 - 打印或另存PDF时保留计算条件、阶段标题、策略图标、数据基线和制作信息。
+- 提供相互独立的中文首页和英文`/en/`页面；每个页面只显示一种语言，不自动跳转。
 - 支持完全离线运行，不上传库存或操作记录。
+
+## 语言页面
+
+中文页面和英文页面共用同一套计算逻辑、规则数据、视觉样式和本地状态，只在构建时注入对应文案。页面不提供语言切换按钮，也不会根据浏览器语言自动跳转。
+
+英文界面统一使用`Collection Item`、`Maintenance Kit`、`Phase`和`Super Success`等游戏术语；普通强化结果使用描述性的`Normal Result`，避免误写为失败。中英文的计算结果和交互能力由自动化测试保持一致。
 
 ## 主题与颜色
 
@@ -69,9 +79,11 @@ npm run build
 
 ## 源码结构
 
-源码按职责拆分，构建时重新内联为一个不依赖外部资源的HTML：
+源码按职责拆分，构建时重新内联为两个不依赖外部资源的单语言HTML：
 
 - `src/index.html`：页面结构和内联位置模板。
+- `src/locales/zh-CN.json`：中文静态、动态、打印和无障碍文案。
+- `src/locales/en.json`：英文静态、动态、打印和无障碍文案。
 - `src/styles/tokens.css`：浅色、深色、字号、尺寸和语义变量。
 - `src/styles/base.css`：页面基础样式和顶部区域。
 - `src/styles/components.css`：通用布局、面板与表单组件。
@@ -82,13 +94,13 @@ npm run build
 - `src/scripts/theme-init.js`：首屏主题初始化。
 - `src/scripts/app.js`：计算、界面状态与本地记录。
 
-`src/index.html`是构建模板，不应作为成品直接分发。`scripts/assemble.mjs`按固定顺序组装源码，`npm run build`生成可以直接打开的`dist/index.html`和Release离线文件。
+`src/index.html`是构建模板，不应作为成品直接分发。`scripts/assemble.mjs`按固定顺序分别注入中文或英文文案，`npm run build`生成中文`dist/index.html`、英文`dist/en/index.html`及对应Release离线文件。
 
 ## 发布
 
 - `main`分支通过数学、契约和真实浏览器测试后自动部署GitHub Pages。
 - 推送`v*`标签后，Release工作流会再次执行同等门禁并自动创建GitHub Release。
-- Release包含离线单文件HTML和SHA-256校验文件。
+- Release包含中文`NIKKE_SR.html`、英文`NIKKE_SR_EN.html`和统一的SHA-256校验文件。
 
 详细流程见[`docs/release_process.md`](docs/release_process.md)。
 

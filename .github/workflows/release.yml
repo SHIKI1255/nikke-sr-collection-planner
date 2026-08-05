@@ -39,6 +39,7 @@ jobs:
         run: >
           gh release create "$GITHUB_REF_NAME"
           "dist/downloads/NIKKE_SR.html"
+          "dist/downloads/NIKKE_SR_EN.html"
           "dist/downloads/SHA256SUMS.txt"
           --title "$GITHUB_REF_NAME"
           --generate-notes

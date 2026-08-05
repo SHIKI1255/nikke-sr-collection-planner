@@ -1,13 +1,15 @@
 {
   "title": "NIKKE SR收藏品强化规划器",
-  "description": "根据当前等级、经验与保养工具库存，动态计算期望最优用料。",
+  "description": "根据当前等级、经验与保养工具库存，生成强化策略并估算达到目标的平均消耗。",
   "creator": {
-    "platform": "Bilibili",
-    "display_name": "努力学习的Gabriel",
-    "credit": "本工具由B站UP主「努力学习的Gabriel」制作"
+    "platform": "GitHub",
+    "display_name": "SHIKI1255",
+    "profile": "https://github.com/SHIKI1255",
+    "credit": "制作：SHIKI1255"
   },
   "repository": "https://github.com/SHIKI1255/nikke-sr-collection-planner",
   "pages": "https://shiki1255.github.io/nikke-sr-collection-planner/",
+  "pages_en": "https://shiki1255.github.io/nikke-sr-collection-planner/en/",
   "default_ruleset": "2026-07-29",
   "default_scenario": "default-example"
 }

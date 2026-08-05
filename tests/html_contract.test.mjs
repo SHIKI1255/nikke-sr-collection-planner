@@ -5,16 +5,13 @@ import { assembleHtml } from "../scripts/assemble.mjs";
 const html = await assembleHtml();
 
 test("public metadata appears only in the footer", () => {
-  assert.equal((html.match(/努力学习的Gabriel/g) || []).length, 1);
-  assert.match(
-    html,
-    /本工具由B站UP主「努力学习的Gabriel」制作/,
-  );
+  assert.match(html, /制作：<a href="https:\/\/github\.com\/SHIKI1255" rel="author">SHIKI1255<\/a>/);
+  assert.doesNotMatch(html, /努力学习的Gabriel|B站UP主/);
   const hero = html.slice(
     html.indexOf('<header class="hero">'),
     html.indexOf("</header>", html.indexOf('<header class="hero">')),
   );
-  assert.doesNotMatch(hero, /数据基线|Gabriel|B站/);
+  assert.doesNotMatch(hero, /数据基线|SHIKI1255|GitHub/);
 });
 
 test("default example inventory is 6000, 2000 and 1000", () => {
@@ -54,7 +51,9 @@ test("policy guidance follows the three game milestone ranges", () => {
   assert.match(html, /\{ start: 0, end: 4, goal: 5 \}/);
   assert.match(html, /\{ start: 5, end: 9, goal: 10 \}/);
   assert.match(html, /\{ start: 10, end: 14, goal: 15 \}/);
-  assert.match(html, /<caption><span>\$\{startLevel\}–\$\{endLevel\}级<\/span><small>强化至\$\{goal\}级<\/small><\/caption>/);
+  assert.match(html, /"stageRange":"\{start\}–\{end\}级"/);
+  assert.match(html, /"stageGoal":"强化至\{goal\}级"/);
+  assert.match(html, /message\("stageRange", \{ start: startLevel, end: endLevel \}\)/);
   assert.doesNotMatch(html, /renderPolicyTable\(policyMap, 0, 7/);
   assert.doesNotMatch(html, /renderPolicyTable\(policyMap, 8, 14/);
 });
@@ -64,7 +63,9 @@ test("page semantics connect descriptions, table headers and busy state", () => 
     assert.match(html, new RegExp(`id="stock-${material}"[^>]+aria-describedby="groups-${material}"`));
   }
   assert.match(html, /class="notice-icon" aria-hidden="true"/);
-  assert.match(html, /<th scope="col">等级<\/th><th scope="col">经验<\/th>/);
+  assert.match(html, /"levelHeader":"等级"/);
+  assert.match(html, /"expHeader":"经验"/);
+  assert.match(html, /<th scope="col">\$\{TEXT\.levelHeader\}<\/th><th scope="col">\$\{TEXT\.expHeader\}<\/th>/);
   assert.match(html, /class="r-head" scope="col">R<\/th>/);
   assert.match(html, /els\.calculate\.setAttribute\("aria-busy", String\(busy\)\)/);
   assert.doesNotMatch(html, />Lv\$\{/);

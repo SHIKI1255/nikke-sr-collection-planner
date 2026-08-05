@@ -7,7 +7,13 @@
   "publication_status": "public",
   "github_repo": "SHIKI1255/nikke-sr-collection-planner",
   "pages_url": "https://shiki1255.github.io/nikke-sr-collection-planner/",
-  "program_version": "1.2.0",
+  "default_locale": "zh-CN",
+  "supported_locales": ["zh-CN", "en"],
+  "pages_routes": {
+    "zh-CN": "/",
+    "en": "/en/"
+  },
+  "program_version": "1.3.0",
   "data_baseline": "2026-07-29",
   "runtime": "static_browser_only",
   "build_output": "dist",

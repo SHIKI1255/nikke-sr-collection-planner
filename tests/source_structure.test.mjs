@@ -58,6 +58,10 @@ function topLevelSelectors(css) {
 }
 
 test("source is split into bounded, purpose-specific modules", async () => {
+  assert.deepEqual(sourceModules.locales, {
+    "zh-CN": "src/locales/zh-CN.json",
+    en: "src/locales/en.json",
+  });
   assert.deepEqual(sourceModules.styles, [
     "src/styles/tokens.css",
     "src/styles/base.css",
@@ -72,6 +76,7 @@ test("source is split into bounded, purpose-specific modules", async () => {
     [sourceModules.template, 400],
     [sourceModules.themeInit, 100],
     [sourceModules.app, 1000],
+    ...Object.values(sourceModules.locales).map((path) => [path, 200]),
     ...sourceModules.styles.map((path) => [path, 800]),
   ]);
 
@@ -84,10 +89,13 @@ test("source is split into bounded, purpose-specific modules", async () => {
 
 test("the template has one marker per inline source category", async () => {
   const template = await readSource(sourceModules.template);
+  const app = await readSource(sourceModules.app);
   assert.equal((template.match(/@inline theme-init/g) || []).length, 1);
   assert.equal((template.match(/@inline styles/g) || []).length, 1);
   assert.equal((template.match(/@inline app/g) || []).length, 1);
+  assert.equal((app.match(/@inline locale/g) || []).length, 1);
   assert.doesNotMatch(template, /window\.__SR_CALCULATOR__|--font-base|\.workspace\s*\{/);
+  assert.doesNotMatch(template, /[\p{Script=Han}]/u);
 });
 
 test("normal component selectors have one canonical definition", async () => {
@@ -116,12 +124,18 @@ test("responsive CSS uses one documented breakpoint system", async () => {
 });
 
 test("assembly produces one dependency-free standalone document", async () => {
-  const html = await assembleHtml();
-  assert.equal((html.match(/<style>/g) || []).length, 1);
-  assert.equal((html.match(/<script>/g) || []).length, 2);
-  assert.doesNotMatch(html, /@inline (?:styles|theme-init|app)/);
-  assert.doesNotMatch(html, /<script\b[^>]*\bsrc\s*=|<link\b[^>]*\brel\s*=\s*["']stylesheet/i);
+  const documents = await Promise.all([
+    assembleHtml(projectRoot, "zh-CN"),
+    assembleHtml(projectRoot, "en"),
+  ]);
+  for (const html of documents) {
+    assert.equal((html.match(/<style>/g) || []).length, 1);
+    assert.equal((html.match(/<script>/g) || []).length, 2);
+    assert.doesNotMatch(html, /@inline (?:styles|theme-init|locale|app)|\{\{[A-Za-z0-9]+\}\}/);
+    assert.doesNotMatch(html, /<script\b[^>]*\bsrc\s*=|<link\b[^>]*\brel\s*=\s*["']stylesheet/i);
+  }
 
+  const html = documents[0];
   const positions = sourceModules.styles.map((path) => {
     const name = path.split("/").at(-1);
     const signatures = {

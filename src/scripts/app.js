@@ -2,6 +2,7 @@
 (() => {
     "use strict";
 
+    const TEXT = /* @inline locale */;
     const MATERIALS = ["R", "SR", "SSR"];
     const POLICY_STAGES = [
       { start: 0, end: 4, goal: 5 },
@@ -26,6 +27,14 @@
     let toastTimer = null;
 
     function byId(id) { return document.getElementById(id); }
+
+    function message(key, values = {}) {
+      const template = TEXT[key];
+      if (typeof template !== "string") throw new Error(`Missing UI message: ${key}`);
+      return template.replace(/\{([A-Za-z0-9]+)\}/g, (token, name) => (
+        Object.hasOwn(values, name) ? String(values[name]) : token
+      ));
+    }
 
     function effectiveTheme(mode) {
       if (mode === "dark" || mode === "light") return mode;
@@ -414,7 +423,7 @@
       }
 
       const mix = bestPolicyMix(policies, active);
-      if (!mix || !(mix.value > EPS)) throw new Error("库存优化未能形成有效策略");
+      if (!mix || !(mix.value > EPS)) throw new Error(TEXT.strategyError);
       const unit = 1 / mix.value;
       const perUnitValues = [0, 0, 0];
       mix.indices.forEach((policyIndex, position) => {
@@ -503,15 +512,21 @@
       els.reserveSSR.value = inputs.reserve.SSR;
       els.currentLevel.value = inputs.start.level;
       els.currentExp.value = inputs.start.exp;
-      els.groupsR.textContent = `${Math.floor(inputs.stock.R / 10)}组＋${inputs.stock.R % 10}个`;
-      els.groupsSR.textContent = `${Math.floor(inputs.stock.SR / 10)}组＋${inputs.stock.SR % 10}个`;
-      els.groupsSSR.textContent = `${Math.floor(inputs.stock.SSR / 10)}组＋${inputs.stock.SSR % 10}个`;
+      els.groupsR.textContent = message("groupRemainder", {
+        groups: Math.floor(inputs.stock.R / 10), items: inputs.stock.R % 10,
+      });
+      els.groupsSR.textContent = message("groupRemainder", {
+        groups: Math.floor(inputs.stock.SR / 10), items: inputs.stock.SR % 10,
+      });
+      els.groupsSSR.textContent = message("groupRemainder", {
+        groups: Math.floor(inputs.stock.SSR / 10), items: inputs.stock.SSR % 10,
+      });
     }
 
     function formatNumber(value, digits = 2) {
-      if (value === Infinity) return "已完成";
+      if (value === Infinity) return TEXT.completed;
       if (!Number.isFinite(value)) return "—";
-      return value.toLocaleString("zh-CN", {
+      return value.toLocaleString(TEXT.numberLocale, {
         minimumFractionDigits: digits,
         maximumFractionDigits: digits,
       });
@@ -529,31 +544,37 @@
 
     function renderCurrentResult(inputs, solution) {
       currentSolution = { inputs, solution };
-      els.printCurrentState.textContent = `${inputs.start.level}级 / ${inputs.start.exp}经验`;
-      els.printTargetLevel.textContent = `${inputs.target}级`;
-      els.printStock.textContent = MATERIALS.map((material) => `${material} ${inputs.stock[material]}个`).join(" / ");
-      els.printReserve.textContent = MATERIALS.map((material) => `${material} ${inputs.reserve[material]}个`).join(" / ");
+      els.printCurrentState.textContent = message("phaseExp", {
+        level: inputs.start.level, exp: inputs.start.exp,
+      });
+      els.printTargetLevel.textContent = message("phase", { value: inputs.target });
+      els.printStock.textContent = MATERIALS
+        .map((material) => message("stockItem", { material, value: inputs.stock[material] }))
+        .join(" / ");
+      els.printReserve.textContent = MATERIALS
+        .map((material) => message("stockItem", { material, value: inputs.reserve[material] }))
+        .join(" / ");
       const capacity = solution.unit;
       if (capacity === Infinity) {
-        els.capacityValue.textContent = "已达成";
+        els.capacityValue.textContent = TEXT.capacityAchieved;
         els.capacityUnit.textContent = "";
-        els.capacityNote.textContent = `当前等级已达到所选目标（${inputs.target}级）。`;
-        els.recommendMaterial.textContent = "无需强化";
-        els.recommendDetail.textContent = "可以调整目标等级或当前状态";
+        els.capacityNote.textContent = message("capacityAchievedNote", { target: inputs.target });
+        els.recommendMaterial.textContent = TEXT.noUpgrade;
+        els.recommendDetail.textContent = TEXT.adjustTarget;
       } else {
         els.capacityValue.textContent = formatNumber(capacity, 2);
-        els.capacityUnit.textContent = "次";
+        els.capacityUnit.textContent = TEXT.capacityUnit;
         const whole = Math.floor(capacity + 1e-7);
         els.capacityNote.textContent = capacity >= 1
-          ? `当前可用库存预计可支持${whole}次达到目标；实际结果需逐次重算。`
-          : "当前可用库存预计不足以完成1次目标，下方显示预计最小缺口。";
+          ? message("capacityEnough", { whole })
+          : TEXT.capacityInsufficient;
         const mains = mainMaterials(solution.probabilities);
-        els.recommendMaterial.textContent = mains.length ? mains.join(" / ") : "可用库存不足";
+        els.recommendMaterial.textContent = mains.length ? mains.join(" / ") : TEXT.stockInsufficient;
         const probabilityText = MATERIALS
           .filter((m) => solution.probabilities[m] > 0.001)
           .map((m) => `${m} ${formatProbability(solution.probabilities[m])}`)
           .join(" · ");
-        els.recommendDetail.textContent = probabilityText || "请补充至少1组可用保养工具";
+        els.recommendDetail.textContent = probabilityText || TEXT.addUsableGroup;
         if (mains[0]) els.actualMaterial.value = mains[0];
       }
 
@@ -570,12 +591,18 @@
         const usageEl = byId(`usage-${material.toLowerCase()}`);
         const metaEl = byId(`usage-meta-${material.toLowerCase()}`);
         const meterEl = byId(`meter-${material.toLowerCase()}`);
-        usageEl.textContent = `${formatNumber(consumption, 2)}组`;
+        usageEl.textContent = message("groups", { value: formatNumber(consumption, 2) });
         const expectedItems = consumption * 10;
         const remaining = inputs.stock[material] - expectedItems;
         metaEl.textContent = remaining >= -0.005
-          ? `预计消耗${formatNumber(expectedItems, 1)}个｜完成后预计剩余${formatNumber(Math.max(0, remaining), 1)}个`
-          : `预计消耗${formatNumber(expectedItems, 1)}个｜仍预计缺少${formatNumber(-remaining, 1)}个`;
+          ? message("consumptionRemaining", {
+            used: formatNumber(expectedItems, 1),
+            remaining: formatNumber(Math.max(0, remaining), 1),
+          })
+          : message("consumptionShortage", {
+            used: formatNumber(expectedItems, 1),
+            shortage: formatNumber(-remaining, 1),
+          });
         const percentage = inputs.available[material] > 0
           ? Math.min(100, consumption / inputs.available[material] * 100)
           : consumption > 0 ? 100 : 0;
@@ -583,18 +610,22 @@
       }
 
       els.bottleneckValue.textContent = bottleneck === "—"
-        ? "当前无需保养工具"
-        : `${bottleneck}｜预计可完成${formatNumber(bottleneckCoverage, 2)}次`;
+        ? TEXT.noKitsNeeded
+        : message("coverage", {
+          material: bottleneck, value: formatNumber(bottleneckCoverage, 2),
+        });
       els.wholeCompletions.textContent = capacity === Infinity
-        ? "可完整完成：已达成"
-        : `可完整完成：${Math.max(0, Math.floor(capacity + 1e-7))}次`;
+        ? TEXT.wholeAchieved
+        : message("wholeCount", { value: Math.max(0, Math.floor(capacity + 1e-7)) });
 
       const shortages = MATERIALS
         .filter((m) => solution.shortage[m] > 1e-6)
-        .map((m) => `${m}约缺${formatNumber(solution.shortage[m] * 10, 1)}个`);
+        .map((material) => message("shortageItem", {
+          material, value: formatNumber(solution.shortage[material] * 10, 1),
+        }));
       if (shortages.length) {
         els.shortageAlert.classList.add("active");
-        els.shortageAlert.innerHTML = `<b>按当前策略完成1次仍预计缺少：</b>${shortages.join("；")}。这是概率平均值，建议额外预留随机波动空间。`;
+        els.shortageAlert.innerHTML = `<b>${TEXT.shortagePrefix}</b>${shortages.join(TEXT.listSeparator)}${TEXT.shortageSuffix}`;
       } else {
         els.shortageAlert.classList.remove("active");
         els.shortageAlert.textContent = "";
@@ -610,8 +641,10 @@
     }
 
     function markHtml(mark, probability = 0) {
-      const label = mark === "circle" ? "主用" : mark === "triangle" ? "混合/次选" : "不建议";
-      const title = probability > 0.002 ? `${label}，策略占比${formatProbability(probability)}` : label;
+      const label = mark === "circle" ? TEXT.markPrimary : mark === "triangle" ? TEXT.markMixed : TEXT.markAvoid;
+      const title = probability > 0.002
+        ? `${label}${TEXT.listSeparator}${message("strategyShare", { value: formatProbability(probability) })}`
+        : label;
       const shape = mark === "circle"
         ? '<circle cx="12" cy="12" r="9.5" fill="none" stroke="currentColor" stroke-width="3"/>'
         : mark === "triangle"
@@ -638,11 +671,11 @@
         });
       }
       if (!rows.length) {
-        return '<div class="table-empty">所选目标等级没有可展示的阶段</div>';
+        return `<div class="table-empty">${TEXT.noStage}</div>`;
       }
-      return `<table class="policy-table" aria-label="${startLevel}至${endLevel}级强化工具建议">
-        <caption><span>${startLevel}–${endLevel}级</span><small>强化至${goal}级</small></caption>
-        <thead><tr><th scope="col">等级</th><th scope="col">经验</th><th class="r-head" scope="col">R</th><th class="sr-head" scope="col">SR</th><th class="ssr-head" scope="col">SSR</th></tr></thead>
+      return `<table class="policy-table" aria-label="${message("policyAria", { start: startLevel, end: endLevel })}">
+        <caption><span>${message("stageRange", { start: startLevel, end: endLevel })}</span><small>${message("stageGoal", { goal })}</small></caption>
+        <thead><tr><th scope="col">${TEXT.levelHeader}</th><th scope="col">${TEXT.expHeader}</th><th class="r-head" scope="col">R</th><th class="sr-head" scope="col">SR</th><th class="ssr-head" scope="col">SSR</th></tr></thead>
         <tbody>${rows.join("")}</tbody>
       </table>`;
     }
@@ -662,7 +695,9 @@
         }
         policyMap.set(stateKey(start), solution.probabilities);
         if (index % 4 === 0) {
-          els.progressText.textContent = `正在生成分阶段工具建议：${index + 1}/${anchors.length}`;
+          els.progressText.textContent = message("progressStages", {
+            current: index + 1, total: anchors.length,
+          });
           await new Promise((resolve) => setTimeout(resolve, 0));
         }
       }
@@ -673,7 +708,7 @@
       const token = ++calculationToken;
       const inputs = getInputs();
       syncNormalizedInputs(inputs);
-      setBusy(true, "正在计算当前强化规划……");
+      setBusy(true, TEXT.calculating);
       await new Promise((resolve) => requestAnimationFrame(() => setTimeout(resolve, 0)));
 
       try {
@@ -691,12 +726,12 @@
         els.policyTables.innerHTML = visibleStages
           .map((stage) => `<div class="table-wrap">${renderPolicyTable(policyMap, stage, inputs.target)}</div>`)
           .join("");
-        els.progressText.textContent = "分阶段工具建议已生成";
+        els.progressText.textContent = TEXT.progressDone;
         saveState(inputs);
         document.documentElement.dataset.status = "ready";
       } catch (error) {
         console.error(error);
-        showToast(`计算失败：${error.message || error}`);
+        showToast(message("calculationFailed", { message: error.message || error }));
         document.documentElement.dataset.status = "error";
       } finally {
         if (token === calculationToken) setBusy(false);
@@ -769,12 +804,12 @@
       const stock = Math.floor(clamp(stockInput.value, 0, 999999));
       const reserve = Math.floor(clamp(reserveInput.value, 0, stock));
       if (stock - reserve < 10) {
-        showToast(`${material}可用数量不足10个（已扣除保留库存），无法记录本次强化`);
+        showToast(message("notEnoughToRecord", { material }));
         return;
       }
       const inputs = getInputs();
       if (inputs.start.level >= inputs.target) {
-        showToast("当前等级已达到所选目标，请调整目标等级或当前状态");
+        showToast(TEXT.alreadyAtTarget);
         return;
       }
       stockInput.value = stock - 10;
@@ -798,14 +833,19 @@
     function renderHistory() {
       els.undo.disabled = history.length === 0;
       if (!history.length) {
-        els.historyList.innerHTML = '<div class="history-empty">尚无强化记录</div>';
+        els.historyList.innerHTML = `<div class="history-empty">${TEXT.historyEmpty}</div>`;
         return;
       }
       els.historyList.innerHTML = history.slice(-5).reverse().map((item) => {
-        const resultText = item.outcome === "success" ? "大成功" : "普通结果";
+        const resultText = item.outcome === "success" ? TEXT.outcomeSuccess : TEXT.outcomeNormal;
         return `<div class="history-item">
           <span>${item.material} · ${resultText}</span>
-          <span>${item.from.level}级/${item.from.exp}经验 → ${item.to.level}级/${item.to.exp}经验</span>
+          <span>${message("historyState", {
+            fromLevel: item.from.level,
+            fromExp: item.from.exp,
+            toLevel: item.to.level,
+            toExp: item.to.exp,
+          })}</span>
         </div>`;
       }).join("");
     }

@@ -1,11 +1,11 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="{{locale}}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light dark">
-  <meta name="description" content="NIKKE SR收藏品强化规划器：根据当前状态与保养工具库存，计算建议使用顺序和预计平均消耗。">
-  <title>NIKKE SR收藏品强化规划器</title>
+  <meta name="description" content="{{metaDescription}}">
+  <title>{{pageTitle}}</title>
   <script>
 /* @inline theme-init */
   </script>
@@ -18,30 +18,30 @@
     <header class="hero">
       <div>
         <div class="hero-topline">
-          <p class="eyebrow">NIKKE · SR COLLECTION PLANNING</p>
-          <div class="theme-switcher" role="group" aria-label="页面主题" data-testid="theme-switcher">
-            <button class="theme-option" type="button" data-theme-mode="auto" aria-pressed="true">自动</button>
-            <button class="theme-option" type="button" data-theme-mode="light" aria-pressed="false">浅色</button>
-            <button class="theme-option" type="button" data-theme-mode="dark" aria-pressed="false">深色</button>
+          <p class="eyebrow">{{eyebrow}}</p>
+          <div class="theme-switcher" role="group" aria-label="{{themeLabel}}" data-testid="theme-switcher">
+            <button class="theme-option" type="button" data-theme-mode="auto" aria-pressed="true">{{themeAuto}}</button>
+            <button class="theme-option" type="button" data-theme-mode="light" aria-pressed="false">{{themeLight}}</button>
+            <button class="theme-option" type="button" data-theme-mode="dark" aria-pressed="false">{{themeDark}}</button>
           </div>
         </div>
-        <h1>SR收藏品强化规划器</h1>
-        <p class="hero-copy">输入当前状态和保养工具库存，计算建议使用顺序与预计平均消耗。每次强化后记录实际结果，规划会自动更新。</p>
+        <h1>{{heroTitle}}</h1>
+        <p class="hero-copy">{{heroCopy}}</p>
       </div>
     </header>
 
     <div class="notice">
       <span class="notice-icon" aria-hidden="true">!</span>
-      <span><b>结果按概率期望计算，不代表每次固定消耗。</b>大成功具有随机性，请在每次强化后记录实际结果并重新计算。</span>
+      <span><b>{{noticeEmphasis}}</b>{{noticeDetail}}</span>
     </div>
 
-    <section class="print-summary" aria-label="本次计算条件">
-      <h2>本次计算条件</h2>
+    <section class="print-summary" aria-label="{{printSummaryLabel}}">
+      <h2>{{printSummaryTitle}}</h2>
       <div class="print-summary-grid">
-        <div><span>当前状态</span><strong id="print-current-state">0级 / 0经验</strong></div>
-        <div><span>目标等级</span><strong id="print-target-level">15级</strong></div>
-        <div><span>工具库存</span><strong id="print-stock">R 6000个 / SR 2000个 / SSR 1000个</strong></div>
-        <div><span>保留库存</span><strong id="print-reserve">R 0个 / SR 0个 / SSR 0个</strong></div>
+        <div><span>{{currentStateLabel}}</span><strong id="print-current-state">{{defaultCurrentState}}</strong></div>
+        <div><span>{{targetLabel}}</span><strong id="print-target-level">{{defaultTarget}}</strong></div>
+        <div><span>{{inventoryLabel}}</span><strong id="print-stock">{{defaultStock}}</strong></div>
+        <div><span>{{reserveLabel}}</span><strong id="print-reserve">{{defaultReserve}}</strong></div>
       </div>
     </section>
 
@@ -50,26 +50,26 @@
         <article class="panel">
           <header class="panel-header">
             <div>
-              <h2>库存与目标</h2>
-              <p>输入保养工具数量；每10个为1组，每组可执行1次强化</p>
+              <h2>{{inventoryHeading}}</h2>
+              <p>{{inventoryCopy}}</p>
             </div>
           </header>
           <div class="panel-body">
             <div class="inventory-grid">
               <div class="inventory-card r">
-                <label for="stock-r"><span class="material-pill">R</span><span>库存</span></label>
+                <label for="stock-r"><span class="material-pill">R</span><span>{{stockLabel}}</span></label>
                 <input id="stock-r" data-testid="stock-r" type="number" min="0" max="999999" step="1" inputmode="numeric" value="6000" aria-describedby="groups-r">
-                <div class="input-hint" id="groups-r">600组＋0个</div>
+                <div class="input-hint" id="groups-r">{{defaultGroupsR}}</div>
               </div>
               <div class="inventory-card sr">
-                <label for="stock-sr"><span class="material-pill">SR</span><span>库存</span></label>
+                <label for="stock-sr"><span class="material-pill">SR</span><span>{{stockLabel}}</span></label>
                 <input id="stock-sr" data-testid="stock-sr" type="number" min="0" max="999999" step="1" inputmode="numeric" value="2000" aria-describedby="groups-sr">
-                <div class="input-hint" id="groups-sr">200组＋0个</div>
+                <div class="input-hint" id="groups-sr">{{defaultGroupsSR}}</div>
               </div>
               <div class="inventory-card ssr">
-                <label for="stock-ssr"><span class="material-pill">SSR</span><span>库存</span></label>
+                <label for="stock-ssr"><span class="material-pill">SSR</span><span>{{stockLabel}}</span></label>
                 <input id="stock-ssr" data-testid="stock-ssr" type="number" min="0" max="999999" step="1" inputmode="numeric" value="1000" aria-describedby="groups-ssr">
-                <div class="input-hint" id="groups-ssr">100组＋0个</div>
+                <div class="input-hint" id="groups-ssr">{{defaultGroupsSSR}}</div>
               </div>
             </div>
 
@@ -77,38 +77,38 @@
 
             <div class="state-grid">
               <div class="field">
-                <label for="current-level">当前等级</label>
+                <label for="current-level">{{currentLevelLabel}}</label>
                 <input id="current-level" data-testid="current-level" type="number" min="0" max="15" step="1" value="0">
               </div>
               <div class="field">
-                <label for="current-exp">当前经验</label>
+                <label for="current-exp">{{currentExpLabel}}</label>
                 <input id="current-exp" data-testid="current-exp" type="number" min="0" max="2900" step="100" value="0">
               </div>
               <div class="field">
-                <label for="target-level">目标等级</label>
+                <label for="target-level">{{targetLevelLabel}}</label>
                 <select id="target-level" data-testid="target-level">
-                  <option value="5">5级</option>
-                  <option value="10">10级</option>
-                  <option value="15" selected>15级</option>
+                  <option value="5">{{target5}}</option>
+                  <option value="10">{{target10}}</option>
+                  <option value="15" selected>{{target15}}</option>
                 </select>
               </div>
             </div>
 
             <details class="advanced">
-              <summary>高级设置：保留库存（不参与规划）</summary>
+              <summary>{{advancedSummary}}</summary>
               <div class="reserve-grid">
-                <label>R保留<input id="reserve-r" type="number" min="0" step="1" inputmode="numeric" value="0"></label>
-                <label>SR保留<input id="reserve-sr" type="number" min="0" step="1" inputmode="numeric" value="0"></label>
-                <label>SSR保留<input id="reserve-ssr" type="number" min="0" step="1" inputmode="numeric" value="0"></label>
+                <label>{{reserveR}}<input id="reserve-r" type="number" min="0" step="1" inputmode="numeric" value="0"></label>
+                <label>{{reserveSR}}<input id="reserve-sr" type="number" min="0" step="1" inputmode="numeric" value="0"></label>
+                <label>{{reserveSSR}}<input id="reserve-ssr" type="number" min="0" step="1" inputmode="numeric" value="0"></label>
               </div>
             </details>
 
             <div class="quick-actions">
-              <button class="button secondary" type="button" id="load-example">载入示例</button>
-              <button class="button secondary" type="button" id="clear-stock">清空库存</button>
+              <button class="button secondary" type="button" id="load-example">{{loadExample}}</button>
+              <button class="button secondary" type="button" id="clear-stock">{{clearStock}}</button>
             </div>
 
-            <button class="button primary" data-testid="calculate" type="button" id="calculate">计算强化规划</button>
+            <button class="button primary" data-testid="calculate" type="button" id="calculate">{{calculate}}</button>
           </div>
         </article>
       </div>
@@ -117,54 +117,54 @@
         <section class="status-panel" aria-live="polite">
           <div class="status-top">
             <div>
-              <p class="status-label">预计可完成次数</p>
-              <p class="capacity"><strong id="capacity-value" data-testid="capacity-value">—</strong><span id="capacity-unit">次</span></p>
-              <p class="capacity-note" id="capacity-note">等待计算。结果按当前可用库存的概率平均值估算，可出现小数。</p>
+              <p class="status-label">{{capacityLabel}}</p>
+              <p class="capacity"><strong id="capacity-value" data-testid="capacity-value">—</strong><span id="capacity-unit">{{capacityUnit}}</span></p>
+              <p class="capacity-note" id="capacity-note">{{capacityWaiting}}</p>
             </div>
             <div class="recommend-box">
-              <small>当前建议使用</small>
+              <small>{{recommendLabel}}</small>
               <div class="recommend-main">
                 <div class="recommend-material" id="recommend-material" data-testid="recommend-material">—</div>
-                <div class="recommend-detail" id="recommend-detail">输入库存后生成建议</div>
+                <div class="recommend-detail" id="recommend-detail">{{recommendWaiting}}</div>
               </div>
             </div>
           </div>
           <div class="progress-line" id="progress-line">
             <span class="spinner"></span>
-            <span id="progress-text">正在生成分阶段工具建议……</span>
+            <span id="progress-text">{{progressInitial}}</span>
           </div>
         </section>
 
         <article class="panel">
           <header class="panel-header">
             <div>
-              <h2>完成1次的预计平均消耗</h2>
-              <p>按当前库存下的最优策略估算；小数表示长期平均值</p>
+              <h2>{{consumptionHeading}}</h2>
+              <p>{{consumptionCopy}}</p>
             </div>
-            <button class="button secondary" type="button" id="print-page">打印/另存PDF</button>
+            <button class="button secondary" type="button" id="print-page">{{printButton}}</button>
           </header>
           <div class="panel-body">
             <div class="result-grid" id="usage-grid">
               <div class="usage-card r" data-material="R">
                 <div class="usage-head"><b>R</b><strong id="usage-r">—</strong></div>
-                <div class="usage-meta" id="usage-meta-r">等待计算</div>
+                <div class="usage-meta" id="usage-meta-r">{{waiting}}</div>
                 <div class="meter"><i id="meter-r"></i></div>
               </div>
               <div class="usage-card sr" data-material="SR">
                 <div class="usage-head"><b>SR</b><strong id="usage-sr">—</strong></div>
-                <div class="usage-meta" id="usage-meta-sr">等待计算</div>
+                <div class="usage-meta" id="usage-meta-sr">{{waiting}}</div>
                 <div class="meter"><i id="meter-sr"></i></div>
               </div>
               <div class="usage-card ssr" data-material="SSR">
                 <div class="usage-head"><b>SSR</b><strong id="usage-ssr">—</strong></div>
-                <div class="usage-meta" id="usage-meta-ssr">等待计算</div>
+                <div class="usage-meta" id="usage-meta-ssr">{{waiting}}</div>
                 <div class="meter"><i id="meter-ssr"></i></div>
               </div>
             </div>
             <div class="bottleneck">
-              <span>主要限制工具</span>
+              <span>{{bottleneckLabel}}</span>
               <strong id="bottleneck-value">—</strong>
-              <span id="whole-completions">可完整完成：—</span>
+              <span id="whole-completions">{{wholeInitial}}</span>
             </div>
             <div class="shortage-alert" id="shortage-alert"></div>
           </div>
@@ -173,26 +173,26 @@
         <article class="panel execution-panel">
           <header class="panel-header">
             <div>
-              <h2>记录本次强化</h2>
-              <p>确认所用工具和结果后，库存与状态会自动更新</p>
+              <h2>{{recordHeading}}</h2>
+              <p>{{recordCopy}}</p>
             </div>
           </header>
           <div class="panel-body">
             <div class="execution-grid">
               <div class="field">
-                <label for="actual-material">本次使用工具</label>
+                <label for="actual-material">{{actualMaterialLabel}}</label>
                 <select id="actual-material" data-testid="actual-material">
                   <option value="R">R</option>
                   <option value="SR">SR</option>
                   <option value="SSR">SSR</option>
                 </select>
               </div>
-              <button class="button soft-neutral" type="button" id="record-normal">记录普通结果</button>
-              <button class="button soft-green" type="button" id="record-success">记录大成功</button>
-              <button class="button secondary" type="button" id="undo" disabled>撤销上次记录</button>
+              <button class="button soft-neutral" type="button" id="record-normal">{{recordNormal}}</button>
+              <button class="button soft-green" type="button" id="record-success">{{recordSuccess}}</button>
+              <button class="button secondary" type="button" id="undo" disabled>{{undo}}</button>
             </div>
             <div class="history-list" id="history-list">
-              <div class="history-empty">尚无强化记录</div>
+              <div class="history-empty">{{historyEmpty}}</div>
             </div>
           </div>
         </article>
@@ -202,36 +202,36 @@
     <section class="panel policy-panel">
       <header class="panel-header policy-toolbar">
         <div>
-          <h2>分阶段工具建议</h2>
-          <p>按当前库存生成；实际操作以上方“当前建议使用”为准</p>
+          <h2>{{policyHeading}}</h2>
+          <p>{{policyCopy}}</p>
         </div>
-        <div class="legend" aria-label="符号说明">
-          <span class="legend-item"><i class="mark circle" aria-hidden="true"><svg class="print-mark" viewBox="0 0 24 24" focusable="false"><circle cx="12" cy="12" r="9.5" fill="none" stroke="currentColor" stroke-width="3"/></svg></i>主用</span>
-          <span class="legend-item"><i class="mark triangle" aria-hidden="true"><svg class="print-mark" viewBox="0 0 24 24" focusable="false"><path d="M12 2.5L22 21H2Z" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/></svg></i>混合/次选</span>
-          <span class="legend-item"><i class="mark cross" aria-hidden="true"><svg class="print-mark" viewBox="0 0 24 24" focusable="false"><path d="M4 4L20 20M20 4L4 20" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg></i>不建议</span>
+        <div class="legend" aria-label="{{legendLabel}}">
+          <span class="legend-item"><i class="mark circle" aria-hidden="true"><svg class="print-mark" viewBox="0 0 24 24" focusable="false"><circle cx="12" cy="12" r="9.5" fill="none" stroke="currentColor" stroke-width="3"/></svg></i>{{markPrimary}}</span>
+          <span class="legend-item"><i class="mark triangle" aria-hidden="true"><svg class="print-mark" viewBox="0 0 24 24" focusable="false"><path d="M12 2.5L22 21H2Z" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/></svg></i>{{markMixed}}</span>
+          <span class="legend-item"><i class="mark cross" aria-hidden="true"><svg class="print-mark" viewBox="0 0 24 24" focusable="false"><path d="M4 4L20 20M20 4L4 20" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg></i>{{markAvoid}}</span>
         </div>
       </header>
       <div class="policy-tables" id="policy-tables" data-testid="policy-tables" data-stage-count="3">
-        <div class="table-wrap"><div class="table-empty">等待计算</div></div>
-        <div class="table-wrap"><div class="table-empty">等待计算</div></div>
-        <div class="table-wrap"><div class="table-empty">等待计算</div></div>
+        <div class="table-wrap"><div class="table-empty">{{waiting}}</div></div>
+        <div class="table-wrap"><div class="table-empty">{{waiting}}</div></div>
+        <div class="table-wrap"><div class="table-empty">{{waiting}}</div></div>
       </div>
     </section>
 
     <section class="method-panel">
       <details>
-        <summary>计算说明与使用限制</summary>
+        <summary>{{methodSummary}}</summary>
         <div class="method-copy">
-          <div class="method-card"><b>计算范围</b>使用当前等级、经验和可用库存，比较R、SR、SSR三种保养工具的预计完成能力。</div>
-          <div class="method-card"><b>建议含义</b>圈表示主用，三角表示混合策略中的次选，叉表示当前条件下不建议使用。</div>
-          <div class="method-card"><b>执行要求</b>每次强化消耗10个同类工具。请记录实际结果后再继续，避免长期按固定表执行。</div>
+          <div class="method-card"><b>{{methodScopeTitle}}</b>{{methodScopeText}}</div>
+          <div class="method-card"><b>{{methodMeaningTitle}}</b>{{methodMeaningText}}</div>
+          <div class="method-card"><b>{{methodExecutionTitle}}</b>{{methodExecutionText}}</div>
         </div>
       </details>
     </section>
 
     <footer class="page-footer">
-      <span>非官方玩家工具｜本地计算，不上传库存数据｜结果为概率期望，仅供强化规划参考</span>
-      <span class="footer-credit">数据基线：2026-07-29｜本工具由B站UP主「努力学习的Gabriel」制作</span>
+      <span>{{footerDisclaimer}}</span>
+      <span class="footer-credit">{{dataBaseline}}2026-07-29{{footerSeparator}}{{creatorPrefix}}<a href="https://github.com/SHIKI1255" rel="author">SHIKI1255</a>{{creatorSuffix}}</span>
     </footer>
   </main>
 
