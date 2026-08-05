@@ -27,6 +27,32 @@
 
 “期望”“节点”“锚点”“凸组合”等词可以出现在计算说明中，但主要操作区域应改写为普通玩家可以直接理解的表达。
 
+## 英文界面术语
+
+| 中文概念 | 英文统一用词 | 避免使用 |
+|---|---|---|
+| 收藏品 | Collection Item | Collectible、Doll（作为正式对象名时） |
+| 保养工具 | Maintenance Kit | Material、Tool Kit |
+| 当前等级/目标等级 | Current Phase / Target Phase | Level、Checkpoint |
+| 大成功 | Super Success | Great Success、Critical Success |
+| 普通结果 | Normal Result | Failure |
+| 保留库存 | Reserved Inventory | Locked Materials |
+| 预计平均消耗 | Estimated Average Kit Use | Guaranteed Cost |
+| 当前建议使用 | Recommended Now | Required Kit |
+| 主用、混合/次选、不建议 | Primary、Mixed / Secondary、Not Recommended | Best、Bad |
+
+英文页面使用完整自然句，不逐字翻译中文语序。`Phase`用于游戏内0–15强化阶段，`Level`只用于确实表示等级的上下文；概率结果必须使用`estimated`、`average`或`probability-based`限定。界面不得将10个工具自创为游戏术语`set`，只在说明换算关系时使用`attempt`或完整表述`one enhancement consumes 10 kits`。
+
+## 单语言页面规则
+
+- 中文根页面只注入`zh-CN`文案，英文`/en/`页面只注入`en`文案。
+- 页面不提供语言切换按钮，不保存语言偏好，也不根据浏览器语言自动跳转。
+- 两个页面共用结构、计算逻辑、规则数据、样式和本地状态；不得复制两套计算代码。
+- 静态正文、动态提示、错误信息、历史记录、打印内容、无障碍标签和页面元数据必须全部来自同一语言目录。
+- 英文成品不得残留中文界面文本；NIKKE、R、SR、SSR、SHIKI1255等商标、稀有度和专有名称除外。
+- 中英文目录必须拥有完全一致的文案键，并通过相同计算结果、布局、打印和交互尺寸验证。
+- 制作人署名固定为中文“制作：SHIKI1255”和英文“Created by SHIKI1255”，均链接至`https://github.com/SHIKI1255`。
+
 ## 文案规则
 
 - 标题说明“用户要做什么”，避免描述内部算法。

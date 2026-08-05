@@ -15,9 +15,10 @@ test("loads the formal public interface and default example", async ({ page }) =
   await expect(page.locator("#stock-sr")).toHaveValue("2000");
   await expect(page.locator("#stock-ssr")).toHaveValue("1000");
   await expect(page.locator("footer")).toContainText(
-    "本工具由B站UP主「努力学习的Gabriel」制作",
+    "制作：SHIKI1255",
   );
-  await expect(page.locator("header.hero")).not.toContainText("Gabriel");
+  await expect(page.locator("footer a[rel=author]")).toHaveAttribute("href", "https://github.com/SHIKI1255");
+  await expect(page.locator("header.hero")).not.toContainText("SHIKI1255");
 });
 
 test("reproduces the two audited optimization baselines", async ({ page }) => {

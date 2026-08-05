@@ -224,6 +224,17 @@ footer.page-footer {
   text-align: right;
 }
 
+.footer-credit a {
+  color: inherit;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+
+.footer-credit a:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
 .toast {
   position: fixed;
   z-index: 30;

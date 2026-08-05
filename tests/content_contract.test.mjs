@@ -16,9 +16,9 @@ test("primary interface uses the player-facing terminology", () => {
     "目标等级",
     "计算强化规划",
     "当前建议使用",
-    "完成1次的预计平均消耗",
+    "达到目标1次的预计平均消耗",
     "主要限制工具",
-    "可完整完成",
+    "可完整达成目标",
     "本次使用工具",
     "分阶段工具建议",
     "计算说明与使用限制",
@@ -28,15 +28,16 @@ test("primary interface uses the player-facing terminology", () => {
 
   assert.doesNotMatch(
     html,
-    /目标节点|当前建议用料|实际使用材料|分阶段用料参考|完整强化容量|单次完成的期望消耗|库存瓶颈|锚点|混合或次选|尚无执行记录|当前无需材料/,
+    /建议使用顺序|目标节点|当前建议用料|实际使用材料|分阶段用料参考|完整强化容量|单次完成的期望消耗|库存瓶颈|锚点|混合或次选|尚无执行记录|当前无需材料/,
   );
 });
 
 test("reached-target capacity can remove an inapplicable unit", () => {
   assert.match(html, /id="capacity-value"[^>]*>—<\/strong><span id="capacity-unit">次<\/span>/);
-  assert.match(html, /els\.capacityValue\.textContent = "已达成";/);
+  assert.match(html, /"capacityAchieved":"已达成"/);
+  assert.match(html, /els\.capacityValue\.textContent = TEXT\.capacityAchieved;/);
   assert.match(html, /els\.capacityUnit\.textContent = "";/);
-  assert.match(html, /els\.capacityUnit\.textContent = "次";/);
+  assert.match(html, /els\.capacityUnit\.textContent = TEXT\.capacityUnit;/);
 });
 
 test("the repository documents one enforceable UI, VI and content standard", () => {
@@ -44,6 +45,8 @@ test("the repository documents one enforceable UI, VI and content standard", () 
 
   for (const rule of [
     "## 用户界面术语",
+    "## 英文界面术语",
+    "## 单语言页面规则",
     "## VI颜色职责",
     "## 排版系统",
     "## 图标规则",

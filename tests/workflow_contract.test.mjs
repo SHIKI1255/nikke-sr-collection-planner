@@ -34,3 +34,10 @@ test("Release rejects a tag that differs from the program version", async () => 
   assert.match(workflow, /GITHUB_REF_NAME.*EXPECTED_TAG/);
   assert.ok(tagGate >= 0 && tagGate < publishStep, "Release must validate its tag before publishing");
 });
+
+test("Release publishes both standalone language pages", async () => {
+  const workflow = await readWorkflow("release");
+  assert.match(workflow, /dist\/downloads\/NIKKE_SR\.html/);
+  assert.match(workflow, /dist\/downloads\/NIKKE_SR_EN\.html/);
+  assert.match(workflow, /dist\/downloads\/SHA256SUMS\.txt/);
+});
