@@ -11,7 +11,7 @@
     "check": "npm run test && npm run test:browser"
   },
   "devDependencies": {
-    "@playwright/test": "1.62.0"
+    "@playwright/test": "1.62.1"
   },
   "engines": {
     "node": ">=20"
