@@ -134,13 +134,12 @@ test("print mode keeps strategy symbols visible and stages intact", async ({ pag
     const tables = document.querySelector(".policy-tables");
     const wrapper = document.querySelector(".table-wrap");
     const mark = document.querySelector(".policy-table .mark");
-    const printMark = mark.querySelector(".print-mark");
+    const printMark = mark.querySelector(".status-icon");
     const printSummary = document.querySelector(".print-summary");
     const footer = document.querySelector("footer.page-footer");
     return {
       tableDisplay: getComputedStyle(tables).display,
       wrapperBreak: getComputedStyle(wrapper).breakInside,
-      screenGlyphDisplay: getComputedStyle(mark, "::before").display,
       printGlyphDisplay: getComputedStyle(printMark).display,
       printGlyphTag: printMark.tagName,
       printGlyphViewBox: printMark.getAttribute("viewBox"),
@@ -153,7 +152,6 @@ test("print mode keeps strategy symbols visible and stages intact", async ({ pag
 
   expect(printState.tableDisplay).toBe("block");
   expect(printState.wrapperBreak).toBe("avoid");
-  expect(printState.screenGlyphDisplay).toBe("none");
   expect(printState.printGlyphDisplay).toBe("block");
   expect(printState.printGlyphTag).toBe("svg");
   expect(printState.printGlyphViewBox).toBe("0 0 24 24");
@@ -236,13 +234,15 @@ test("major sections share exact column and full-width boundaries", async ({ pag
 test("status icons use identical vector geometry", async ({ page }) => {
   const geometry = await page.locator(".legend .mark").evaluateAll((icons) => icons.map((icon) => {
     const box = icon.getBoundingClientRect();
-    const pseudo = getComputedStyle(icon, "::before");
+    const svg = icon.querySelector("svg");
+    const glyph = svg.getBoundingClientRect();
     return {
       width: box.width,
       height: box.height,
-      pseudoWidth: pseudo.width,
-      pseudoHeight: pseudo.height,
-      mask: pseudo.maskImage || pseudo.webkitMaskImage,
+      glyphWidth: glyph.width,
+      glyphHeight: glyph.height,
+      viewBox: svg.getAttribute("viewBox"),
+      strokeWidth: svg.firstElementChild.getAttribute("stroke-width"),
     };
   }));
 
@@ -250,9 +250,10 @@ test("status icons use identical vector geometry", async ({ page }) => {
   for (const icon of geometry) {
     expect(icon.width).toBe(22);
     expect(icon.height).toBe(22);
-    expect(icon.pseudoWidth).toBe("22px");
-    expect(icon.pseudoHeight).toBe("22px");
-    expect(icon.mask).toContain("svg");
+    expect(icon.glyphWidth).toBe(22);
+    expect(icon.glyphHeight).toBe(22);
+    expect(icon.viewBox).toBe("0 0 24 24");
+    expect(icon.strokeWidth).toBe("3");
   }
 });
 

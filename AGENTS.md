@@ -17,5 +17,14 @@ This repository publishes a browser-only NIKKE SR collection-item planner.
 
 ## Required checks
 
-Run `npm test` and `npm run test:browser` before publishing. A release must be
+Run `npm run check` (strict types, production-core/contracts, browser tests)
+before publishing. A release must be
 built from the same source state deployed to GitHub Pages.
+
+## Module boundaries
+
+- `src/core/` must not import DOM, locale, storage, or runtime modules.
+- Rules/scenarios/site config are build inputs, not duplicated script constants.
+- Persist kit counts; pass attempt budgets to the engine. Never mix these units.
+- Preserve request revisions, legacy storage migration and standalone Worker fallback.
+- Keep visual tokens and SVG geometry shared across locales, themes and print.

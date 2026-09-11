@@ -10,7 +10,7 @@ A fully local, browser-based enhancement planner for NIKKE SR Collection Items. 
 - Use online (English): [English Page](https://shiki1255.github.io/nikke-sr-collection-planner/en/)
 - Use online (Chinese): [Chinese Page](https://shiki1255.github.io/nikke-sr-collection-planner/)
 - Use offline: [Download the latest Release](https://github.com/SHIKI1255/nikke-sr-collection-planner/releases/latest)
-- Current program version: `v1.3.0`
+- Current program version: `v1.4.0`
 - Current data baseline: `2026-07-29`
 - Created by: [SHIKI1255](https://github.com/SHIKI1255)
 
@@ -63,7 +63,7 @@ The program version tracks application, interface, and build changes. The data b
 
 Node.js 20 or later is required.
 
-```bash
+```powershell
 npm ci
 npx playwright install chromium
 npm run check
@@ -71,7 +71,7 @@ npm run check
 
 Build the GitHub Pages routes and standalone offline files:
 
-```bash
+```powershell
 npm run build
 ```
 
@@ -79,26 +79,40 @@ Generated files are written to `dist/`. This directory is not committed.
 
 ## Source Layout
 
-The source is split by responsibility and assembled into two dependency-free, single-language HTML files:
+The source uses strict TypeScript, native HTML/CSS and esbuild, without a UI framework. Distribution remains a double-clickable, standalone HTML file.
 
-- `src/index.html`: shared page structure and inline-source template.
-- `src/locales/zh-CN.json`: Chinese static, dynamic, print, and accessibility copy.
-- `src/locales/en.json`: English static, dynamic, print, and accessibility copy.
-- `src/styles/tokens.css`: light and dark theme, typography, sizing, and semantic tokens.
-- `src/styles/base.css`: foundational page and header styles.
-- `src/styles/components.css`: shared panels, forms, and layout components.
-- `src/styles/results.css`: calculation results, kit use, and history components.
-- `src/styles/policy.css`: Phase tables, icons, method notes, footer, and feedback components.
-- `src/styles/responsive.css`: `1040/720/380px` responsive and accessibility rules.
-- `src/styles/print.css`: print-specific overrides.
-- `src/scripts/theme-init.js`: initial theme setup.
-- `src/scripts/app.js`: calculation, interface state, and local history.
+- `src/core/`: pure rules validation, transition graph, optimizer and bounded cache; no DOM or storage dependency.
+- `src/state/`: kit inventory, targets, history/undo and storage migration; budgets are converted to enhancement attempts.
+- `src/runtime/`: themes, calculation tasks and Worker/cooperative execution.
+- `src/view/`: formatting, forms, results, history and shared SVG icons.
+- `src/index.html`, `src/locales/`, `src/styles/`: shared template, language catalogs and VI tokens.
+- `src/app.ts`, `src/worker.ts`: page and background-computation entry points.
+- `config/site.json`: ruleset/scenario selection and language build routes.
 
-`src/index.html` is a build template and is not a distributable file. `scripts/assemble.mjs` injects one language catalog at a time. `npm run build` generates the Chinese `dist/index.html`, English `dist/en/index.html`, and both Release downloads.
+Rules are sourced from `data/rulesets/`; default inventory comes from `data/scenarios/`. Do not duplicate game constants in application code. The template is not a distributable file. The build produces both Pages routes and both standalone downloads.
+
+See [Architecture and compatibility](docs/architecture.md). Preview and performance commands:
+
+```powershell
+npm run preview
+npm run benchmark
+npm run benchmark -- --baseline-ref 4e6cd64
+```
+
+Preview listens only on `127.0.0.1:4173`, with Chinese at `/` and English at `/en/`. Benchmarks report the median of five independent runs per profile. CPU throttling simulates a slower machine; it is not a physical mobile-device measurement. Compare against a pre-refactor commit.
+
+## Refactor Highlights
+
+- Existing layouts, VI, offline files and historical numerical baselines are preserved. The public calculation API remains compatible.
+- Editing any calculation input invalidates the old plan. Recalculate manually; reaching a target never advances it automatically.
+- Background work produces the current result first, then the Phase tables. Superseded tasks cannot overwrite inputs; identical requests can reuse cached results.
+- Records and undo are saved before recalculation. Legacy inventory is migrated and damaged history entries are discarded.
+- The page's print button waits for a complete plan. Native browser printing shows a warning instead of an incomplete or outdated report.
+- With no usable inventory, the shortage belongs to a reference strategy, not a proven minimum-shortage solution. All results remain probabilistic expectations.
 
 ## Publishing
 
-- A passing `main` branch automatically deploys to GitHub Pages after mathematical, contract, and real-browser checks.
+- PRs use the shared validation gate. A `main` push is validated once by the Pages workflow before deployment.
 - Pushing a `v*` tag runs the same gates and creates a GitHub Release.
 - Each Release contains Chinese `NIKKE_SR.html`, English `NIKKE_SR_EN.html`, and `SHA256SUMS.txt`.
 

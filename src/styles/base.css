@@ -1,4 +1,5 @@
 * { box-sizing: border-box; }
+.print-warning { display: none; }
 
 html { scroll-behavior: smooth; }
 

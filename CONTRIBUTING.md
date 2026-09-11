@@ -18,20 +18,21 @@
 4. 来源等级：官方/游戏内、长期维护攻略或社区记录。
 5. 对0至15、5至15、方案基线和页面推荐的影响。
 
-不要只修改`src/index.html`中的常量。规则集、来源记录和回归测试必须同步更新。
+游戏参数只在 `data/rulesets/` 维护，由构建直接注入引擎。选择规则集使用 `config/site.json`；默认库存使用 `data/scenarios/`。数据修正必须同步来源记录与回归测试，不得在页面中复制参数。
 
 ## 程序改动
 
 提交前运行：
 
-```bash
+```powershell
 npm ci
-npm test
 npx playwright install chromium
-npm run test:browser
+npm run check
 ```
 
 涉及计算内核时，应提供至少一个能在旧版本失败、在新版本通过的回归案例。
+
+原生 HTML/CSS 与 TypeScript 只在本地构建时使用开发依赖；运行期不能引入网络依赖。模块职责和 API 兼容边界见 [架构说明](docs/architecture.md)。不要通过改掉审计期望值或删除行为测试来消除回归失败。
 
 ## Pull Request
 

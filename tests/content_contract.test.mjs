@@ -32,13 +32,7 @@ test("primary interface uses the player-facing terminology", () => {
   );
 });
 
-test("reached-target capacity can remove an inapplicable unit", () => {
-  assert.match(html, /id="capacity-value"[^>]*>—<\/strong><span id="capacity-unit">次<\/span>/);
-  assert.match(html, /"capacityAchieved":"已达成"/);
-  assert.match(html, /els\.capacityValue\.textContent = TEXT\.capacityAchieved;/);
-  assert.match(html, /els\.capacityUnit\.textContent = "";/);
-  assert.match(html, /els\.capacityUnit\.textContent = TEXT\.capacityUnit;/);
-});
+// Reached-target text and unit behavior are verified in calculator.spec.mjs.
 
 test("the repository documents one enforceable UI, VI and content standard", () => {
   assert.match(readme, /docs\/ui_content_style_guide\.md/);

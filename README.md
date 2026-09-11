@@ -10,7 +10,7 @@
 - 在线使用（中文）：[GitHub Pages](https://shiki1255.github.io/nikke-sr-collection-planner/)
 - Online (English): [English Page](https://shiki1255.github.io/nikke-sr-collection-planner/en/)
 - 离线使用：[下载最新Release](https://github.com/SHIKI1255/nikke-sr-collection-planner/releases/latest)
-- 当前程序版本：`v1.3.0`
+- 当前程序版本：`v1.4.0`
 - 当前数据基线：`2026-07-29`
 - 制作：[SHIKI1255](https://github.com/SHIKI1255)
 
@@ -63,7 +63,7 @@
 
 需要Node.js 20或更高版本。
 
-```bash
+```powershell
 npm ci
 npx playwright install chromium
 npm run check
@@ -71,7 +71,7 @@ npm run check
 
 生成GitHub Pages和离线单文件成品：
 
-```bash
+```powershell
 npm run build
 ```
 
@@ -79,26 +79,40 @@ npm run build
 
 ## 源码结构
 
-源码按职责拆分，构建时重新内联为两个不依赖外部资源的单语言HTML：
+源码使用严格 TypeScript、原生 HTML/CSS 和 esbuild，不引入 UI 框架。构建结果仍为可双击打开的单文件 HTML。
 
-- `src/index.html`：页面结构和内联位置模板。
-- `src/locales/zh-CN.json`：中文静态、动态、打印和无障碍文案。
-- `src/locales/en.json`：英文静态、动态、打印和无障碍文案。
-- `src/styles/tokens.css`：浅色、深色、字号、尺寸和语义变量。
-- `src/styles/base.css`：页面基础样式和顶部区域。
-- `src/styles/components.css`：通用布局、面板与表单组件。
-- `src/styles/results.css`：计算结果、材料用量与强化记录组件。
-- `src/styles/policy.css`：阶段建议表、图标、计算说明、页脚与提示组件。
-- `src/styles/responsive.css`：`1040/720/380px`响应式与辅助功能规则。
-- `src/styles/print.css`：打印专用覆盖。
-- `src/scripts/theme-init.js`：首屏主题初始化。
-- `src/scripts/app.js`：计算、界面状态与本地记录。
+- `src/core/`：纯计算引擎、规则校验、预计算状态转移、数值优化与有界缓存；不依赖界面或本地存储。
+- `src/state/`：库存（工具个数）、目标、记录/撤销与存储版本迁移；计算预算统一换算为强化次数。
+- `src/runtime/`：主题、计算任务与 Worker/分段执行降级。
+- `src/view/`：格式化、表单、结果、历史与共用 SVG 图标。
+- `src/index.html`、`src/locales/`、`src/styles/`：共用模板、独立语言文案和统一 VI。
+- `src/app.ts`、`src/worker.ts`：页面与后台计算入口。
+- `config/site.json`：规则集、默认场景与语言输出路径的选择入口。
 
-`src/index.html`是构建模板，不应作为成品直接分发。`scripts/assemble.mjs`按固定顺序分别注入中文或英文文案，`npm run build`生成中文`dist/index.html`、英文`dist/en/index.html`及对应Release离线文件。
+规则来自 `data/rulesets/`，默认库存来自 `data/scenarios/`。不要在页面脚本中再维护一份常量。`src/index.html` 是模板，不应直接分发；`npm run build` 生成中文 `dist/index.html`、英文 `dist/en/index.html` 及两个离线文件。
+
+架构、扩展方式及兼容约定见 [架构说明](docs/architecture.md)。本地预览和性能对比：
+
+```powershell
+npm run preview
+npm run benchmark
+npm run benchmark -- --baseline-ref 4e6cd64
+```
+
+预览仅监听 `127.0.0.1:4173`；中文路径为 `/`，英文路径为 `/en/`。基准测试每种模式独立运行五次，报告中位数；CPU 降速是本机模拟，不是实测手机性能。对比参数应使用重构前的提交。
+
+## 本次重构
+
+- 保持现有页面、VI、离线能力和历史计算基线；公开计算 API 保持兼容。
+- 修改任一计算条件后，旧结果立即失效，需要点击“计算强化规划”；达到目标不会自动切换到下一目标。
+- 后台计算优先给出当前结果，再生成阶段建议；旧任务不能覆盖新输入，同一请求可复用缓存。
+- 记录与撤销先更新本地状态，再重新计算；自动兼容旧库存，过滤损坏历史。
+- 页面打印按钮等待完整规划；直接使用浏览器打印时，未完成的规划会显示提示而非旧报告。
+- 无可用库存时显示参考策略缺口，不宣称它是“最小缺口”。结果始终是概率期望，不是单次成功保证。
 
 ## 发布
 
-- `main`分支通过数学、契约和真实浏览器测试后自动部署GitHub Pages。
+- PR 使用共享验证门禁；`main` 推送由 Pages 工作流验证一次后部署，避免重复执行整套检查。
 - 推送`v*`标签后，Release工作流会再次执行同等门禁并自动创建GitHub Release。
 - Release包含中文`NIKKE_SR.html`、英文`NIKKE_SR_EN.html`和统一的SHA-256校验文件。
 

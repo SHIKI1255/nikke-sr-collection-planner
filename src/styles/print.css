@@ -7,26 +7,7 @@
   :root,
   html[data-theme="dark"] {
     color-scheme: light;
-    --bg: #ffffff;
-    --bg-top: #ffffff;
-    --paper: #ffffff;
-    --paper-soft: #f7f8fa;
-    --paper-subtle: #fafbfd;
-    --ink: #152235;
-    --text-secondary: #596579;
-    --muted: #647184;
-    --line: #dce2e9;
-    --navy-soft: #eaf2f8;
-    --info: #476d94;
-    --r: #37b7f4;
-    --r-ink: #086a9f;
-    --r-soft: #eaf8ff;
-    --sr: #b03bed;
-    --sr-ink: #73229e;
-    --sr-soft: #f6ecff;
-    --ssr: #f2b637;
-    --ssr-ink: #8a5b00;
-    --ssr-soft: #fff4d6;
+    /* @inline print-theme */
   }
 
   html,
@@ -35,6 +16,18 @@
     background: #ffffff;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
+  }
+  html:not([data-status="ready"]) .print-summary,
+  html:not([data-status="ready"]) .status-panel,
+  html:not([data-status="ready"]) .right-column > .panel,
+  html:not([data-status="ready"]) .policy-panel { display: none !important; }
+  html:not([data-status="ready"]) .print-warning {
+    display: block;
+    color: var(--ink);
+    font-size: var(--font-base);
+    line-height: var(--leading-normal);
+    border: 1px solid var(--control-line);
+    padding: var(--padding-panel-inline);
   }
   .app-shell { width: 100%; padding: 0; }
   .notice, .left-column, .execution-panel, .method-panel,
@@ -97,12 +90,6 @@
   .policy-table th,
   .policy-table td { height: 24px; padding-block: 2px; }
   .policy-table thead th { height: 30px; }
-  .mark::before { display: none; }
-  .print-mark {
-    display: block;
-    width: var(--size-status-icon);
-    height: var(--size-status-icon);
-  }
   footer.page-footer {
     display: block;
     margin-top: 12px;

@@ -11,5 +11,9 @@
   "pages": "https://shiki1255.github.io/nikke-sr-collection-planner/",
   "pages_en": "https://shiki1255.github.io/nikke-sr-collection-planner/en/",
   "default_ruleset": "2026-07-29",
-  "default_scenario": "default-example"
+  "default_scenario": "default-example",
+  "languages": [
+    { "locale": "zh-CN", "pagePath": "index.html", "offlineName": "NIKKE_SR.html" },
+    { "locale": "en", "pagePath": "en/index.html", "offlineName": "NIKKE_SR_EN.html" }
+  ]
 }
