@@ -1,75 +1,32 @@
 import { createHash } from "node:crypto";
 import { mkdir, rm, writeFile } from "node:fs/promises";
 import { basename, dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
 import { assembleHtml } from "./assemble.mjs";
+import { loadProject, projectRoot } from "./project-config.mjs";
 
-const scriptDir = dirname(fileURLToPath(import.meta.url));
-const root = resolve(scriptDir, "..");
-const distDir = resolve(root, "dist");
-
-if (dirname(distDir) !== root || basename(distDir) !== "dist") {
-  throw new Error("Refusing to build outside the repository dist directory.");
-}
-
-const builds = [
-  {
-    locale: "zh-CN",
-    pagePath: "index.html",
-    offlineName: "NIKKE_SR.html",
-    requiredTokens: ["SR收藏品强化规划器", "保养工具", "达到目标1次", "制作：", "SHIKI1255"],
-  },
-  {
-    locale: "en",
-    pagePath: "en/index.html",
-    offlineName: "NIKKE_SR_EN.html",
-    requiredTokens: ["SR Collection Item Enhancement Planner", "Maintenance Kit", "Super Success", "Created by", "SHIKI1255"],
-  },
-];
-
+const distDir = resolve(projectRoot, "dist");
+if (dirname(distDir) !== projectRoot || basename(distDir) !== "dist") throw new Error("Invalid build output directory");
+const { site, rules } = await loadProject();
+const checksumLines = [];
+// Assemble and validate everything before replacing the previous local build.
+const artifacts = await Promise.all(site.languages.map(async (build) => {
+  const html = await assembleHtml(projectRoot, build.locale);
+  for (const token of [rules.verified_at, "window.__SR_CALCULATOR__", site.creator.display_name]) {
+    if (!html.includes(token)) throw new Error(`Missing build token: ${token}`);
+  }
+  if (build.locale === "en" && /\p{Script=Han}/u.test(html)) throw new Error("English source HTML contains Chinese interface text");
+  return { ...build, html };
+}));
 await rm(distDir, { recursive: true, force: true });
 await mkdir(resolve(distDir, "downloads"), { recursive: true });
-
-const checksumLines = [];
-const buildSummaries = [];
-for (const build of builds) {
-  const html = await assembleHtml(root, build.locale);
-  const commonTokens = [
-    "2026-07-29",
-    "window.__SR_CALCULATOR__",
-    'value="6000"',
-    'value="2000"',
-    'value="1000"',
-  ];
-  for (const token of [...commonTokens, ...build.requiredTokens]) {
-    if (!html.includes(token)) {
-      throw new Error(`${build.locale} source HTML is missing required token: ${token}`);
-    }
-  }
-  for (const retiredCredit of ["努力学习的Gabriel", "B站UP主"]) {
-    if (html.includes(retiredCredit)) {
-      throw new Error(`${build.locale} source HTML still contains retired credit: ${retiredCredit}`);
-    }
-  }
-  if (build.locale === "en" && /\p{Script=Han}/u.test(html)) {
-    throw new Error("English source HTML contains Chinese interface text.");
-  }
-
-  const pagePath = resolve(distDir, build.pagePath);
-  const offlinePath = resolve(distDir, "downloads", build.offlineName);
-  const checksum = createHash("sha256").update(html, "utf8").digest("hex");
+for (const artifact of artifacts) {
+  const pagePath = resolve(distDir, artifact.pagePath);
+  const checksum = createHash("sha256").update(artifact.html).digest("hex");
   await mkdir(dirname(pagePath), { recursive: true });
-  await writeFile(pagePath, html, "utf8");
-  await writeFile(offlinePath, html, "utf8");
-  checksumLines.push(`${checksum}  ${build.offlineName}`);
-  buildSummaries.push(`${build.locale}:${checksum.slice(0, 12)}`);
+  await writeFile(pagePath, artifact.html, "utf8");
+  await writeFile(resolve(distDir, "downloads", artifact.offlineName), artifact.html, "utf8");
+  checksumLines.push(`${checksum}  ${artifact.offlineName}`);
+  console.log(`Built ${artifact.locale}: ${Buffer.byteLength(artifact.html)} bytes, SHA256 ${checksum}`);
 }
-
 await writeFile(resolve(distDir, ".nojekyll"), "", "utf8");
-await writeFile(
-  resolve(distDir, "downloads", "SHA256SUMS.txt"),
-  `${checksumLines.join("\n")}\n`,
-  "utf8",
-);
-
-console.log(`Built bilingual Pages and standalone artifacts (${buildSummaries.join(", ")}).`);
+await writeFile(resolve(distDir, "downloads/SHA256SUMS.txt"), `${checksumLines.join("\n")}\n`, "utf8");

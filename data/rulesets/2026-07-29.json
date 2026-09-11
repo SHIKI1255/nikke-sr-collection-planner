@@ -6,6 +6,7 @@
   "scope": "NIKKE SR收藏品0至15级强化",
   "action_size": 10,
   "exp_per_level": 3000,
+  "exp_step": 100,
   "milestones": [5, 10, 15],
   "materials": {
     "R": {

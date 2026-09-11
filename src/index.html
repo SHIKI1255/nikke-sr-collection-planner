@@ -35,6 +35,8 @@
       <span><b>{{noticeEmphasis}}</b>{{noticeDetail}}</span>
     </div>
 
+    <p class="print-warning" role="status">{{printWarning}}</p>
+
     <section class="print-summary" aria-label="{{printSummaryLabel}}">
       <h2>{{printSummaryTitle}}</h2>
       <div class="print-summary-grid">
@@ -58,17 +60,17 @@
             <div class="inventory-grid">
               <div class="inventory-card r">
                 <label for="stock-r"><span class="material-pill">R</span><span>{{stockLabel}}</span></label>
-                <input id="stock-r" data-testid="stock-r" type="number" min="0" max="999999" step="1" inputmode="numeric" value="6000" aria-describedby="groups-r">
+                <input id="stock-r" data-testid="stock-r" type="number" min="0" max="999999" step="1" inputmode="numeric" value="{{stockR}}" aria-describedby="groups-r">
                 <div class="input-hint" id="groups-r">{{defaultGroupsR}}</div>
               </div>
               <div class="inventory-card sr">
                 <label for="stock-sr"><span class="material-pill">SR</span><span>{{stockLabel}}</span></label>
-                <input id="stock-sr" data-testid="stock-sr" type="number" min="0" max="999999" step="1" inputmode="numeric" value="2000" aria-describedby="groups-sr">
+                <input id="stock-sr" data-testid="stock-sr" type="number" min="0" max="999999" step="1" inputmode="numeric" value="{{stockSR}}" aria-describedby="groups-sr">
                 <div class="input-hint" id="groups-sr">{{defaultGroupsSR}}</div>
               </div>
               <div class="inventory-card ssr">
                 <label for="stock-ssr"><span class="material-pill">SSR</span><span>{{stockLabel}}</span></label>
-                <input id="stock-ssr" data-testid="stock-ssr" type="number" min="0" max="999999" step="1" inputmode="numeric" value="1000" aria-describedby="groups-ssr">
+                <input id="stock-ssr" data-testid="stock-ssr" type="number" min="0" max="999999" step="1" inputmode="numeric" value="{{stockSSR}}" aria-describedby="groups-ssr">
                 <div class="input-hint" id="groups-ssr">{{defaultGroupsSSR}}</div>
               </div>
             </div>
@@ -78,18 +80,16 @@
             <div class="state-grid">
               <div class="field">
                 <label for="current-level">{{currentLevelLabel}}</label>
-                <input id="current-level" data-testid="current-level" type="number" min="0" max="15" step="1" value="0">
+                <input id="current-level" data-testid="current-level" type="number" min="0" max="{{maxLevel}}" step="1" value="{{initialLevel}}">
               </div>
               <div class="field">
                 <label for="current-exp">{{currentExpLabel}}</label>
-                <input id="current-exp" data-testid="current-exp" type="number" min="0" max="2900" step="100" value="0">
+                <input id="current-exp" data-testid="current-exp" type="number" min="0" max="{{maxExp}}" step="{{expStep}}" value="{{initialExp}}">
               </div>
               <div class="field">
                 <label for="target-level">{{targetLevelLabel}}</label>
                 <select id="target-level" data-testid="target-level">
-                  <option value="5">{{target5}}</option>
-                  <option value="10">{{target10}}</option>
-                  <option value="15" selected>{{target15}}</option>
+<!-- @inline targets -->
                 </select>
               </div>
             </div>
@@ -97,9 +97,9 @@
             <details class="advanced">
               <summary>{{advancedSummary}}</summary>
               <div class="reserve-grid">
-                <label>{{reserveR}}<input id="reserve-r" type="number" min="0" step="1" inputmode="numeric" value="0"></label>
-                <label>{{reserveSR}}<input id="reserve-sr" type="number" min="0" step="1" inputmode="numeric" value="0"></label>
-                <label>{{reserveSSR}}<input id="reserve-ssr" type="number" min="0" step="1" inputmode="numeric" value="0"></label>
+                <label>{{reserveR}}<input id="reserve-r" type="number" min="0" step="1" inputmode="numeric" value="{{reserveR}}"></label>
+                <label>{{reserveSR}}<input id="reserve-sr" type="number" min="0" step="1" inputmode="numeric" value="{{reserveSR}}"></label>
+                <label>{{reserveSSR}}<input id="reserve-ssr" type="number" min="0" step="1" inputmode="numeric" value="{{reserveSSR}}"></label>
               </div>
             </details>
 
@@ -206,9 +206,9 @@
           <p>{{policyCopy}}</p>
         </div>
         <div class="legend" aria-label="{{legendLabel}}">
-          <span class="legend-item"><i class="mark circle" aria-hidden="true"><svg class="print-mark" viewBox="0 0 24 24" focusable="false"><circle cx="12" cy="12" r="9.5" fill="none" stroke="currentColor" stroke-width="3"/></svg></i>{{markPrimary}}</span>
-          <span class="legend-item"><i class="mark triangle" aria-hidden="true"><svg class="print-mark" viewBox="0 0 24 24" focusable="false"><path d="M12 2.5L22 21H2Z" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/></svg></i>{{markMixed}}</span>
-          <span class="legend-item"><i class="mark cross" aria-hidden="true"><svg class="print-mark" viewBox="0 0 24 24" focusable="false"><path d="M4 4L20 20M20 4L4 20" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg></i>{{markAvoid}}</span>
+          <span class="legend-item"><span data-legend-mark="circle"></span>{{markPrimary}}</span>
+          <span class="legend-item"><span data-legend-mark="triangle"></span>{{markMixed}}</span>
+          <span class="legend-item"><span data-legend-mark="cross"></span>{{markAvoid}}</span>
         </div>
       </header>
       <div class="policy-tables" id="policy-tables" data-testid="policy-tables" data-stage-count="3">
@@ -231,7 +231,7 @@
 
     <footer class="page-footer">
       <span>{{footerDisclaimer}}</span>
-      <span class="footer-credit">{{dataBaseline}}2026-07-29{{footerSeparator}}{{creatorPrefix}}<a href="https://github.com/SHIKI1255" rel="author">SHIKI1255</a>{{creatorSuffix}}</span>
+      <span class="footer-credit">{{dataBaseline}}{{verifiedAt}}{{footerSeparator}}{{creatorPrefix}}<a href="{{creatorProfile}}" rel="author">{{creatorName}}</a>{{creatorSuffix}}</span>
     </footer>
   </main>
 

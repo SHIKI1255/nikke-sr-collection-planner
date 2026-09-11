@@ -1,43 +1,35 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
+const read = (name) => readFile(new URL(`../.github/${name}`, import.meta.url), "utf8");
 
-async function readWorkflow(name) {
-  return readFile(new URL(`../.github/workflows/${name}.yml`, import.meta.url), "utf8");
-}
-
-test("CI, Pages and Release all enforce the browser publishing gate", async () => {
+test("PR, Pages and Release reuse one validation/build gate", async () => {
+  const shared = await read("actions/validate/action.yml");
+  for (const step of ["npm ci", "npm run typecheck", "npm test", "npx playwright install --with-deps chromium", "npm run test:browser"]) {
+    assert.ok(shared.includes(step), step);
+  }
   for (const name of ["ci", "pages", "release"]) {
-    const workflow = await readWorkflow(name);
-    assert.match(workflow, /run: npm ci/);
-    assert.match(workflow, /run: npx playwright install --with-deps chromium/);
-    assert.match(workflow, /npm test/);
-    assert.match(workflow, /npm run test:browser/);
+    const workflow = await read(`workflows/${name}.yml`);
+    const gate = workflow.indexOf("uses: ./.github/actions/validate");
+    assert.ok(gate > 0);
+    const publish = Math.max(workflow.indexOf("actions/upload-pages-artifact"), workflow.indexOf("gh release create"));
+    if (publish >= 0) assert.ok(gate < publish);
+  }
+  const ci = await read("workflows/ci.yml");
+  assert.ok(ci.includes("pull_request:"));
+  assert.doesNotMatch(ci, /push:/);
+  assert.match(await read("workflows/pages.yml"), /push:\s*branches: \["main"\]/);
+});
 
-    const browserGate = workflow.indexOf("npm run test:browser");
-    const publishStep = Math.max(
-      workflow.indexOf("actions/upload-pages-artifact"),
-      workflow.indexOf("gh release create"),
-    );
-    if (publishStep >= 0) {
-      assert.ok(browserGate < publishStep, `${name} must test in Chromium before publishing`);
+test("external actions stay pinned and release tag is checked before publishing", async () => {
+  for (const path of ["actions/validate/action.yml", ...["ci", "pages", "release"].map((name) => `workflows/${name}.yml`)]) {
+    const content = await read(path);
+    for (const match of content.matchAll(/uses:\s+([^\s]+)/g)) {
+      if (!match[1].startsWith("./")) assert.match(match[1], /@[0-9a-f]{40}$/);
     }
   }
-});
-
-test("Release rejects a tag that differs from the program version", async () => {
-  const workflow = await readWorkflow("release");
-  const tagGate = workflow.indexOf("EXPECTED_TAG=");
-  const publishStep = workflow.indexOf("gh release create");
-
-  assert.match(workflow, /EXPECTED_TAG="v\$\(node -p .*package\.json.*\)"/);
-  assert.match(workflow, /GITHUB_REF_NAME.*EXPECTED_TAG/);
-  assert.ok(tagGate >= 0 && tagGate < publishStep, "Release must validate its tag before publishing");
-});
-
-test("Release publishes both standalone language pages", async () => {
-  const workflow = await readWorkflow("release");
-  assert.match(workflow, /dist\/downloads\/NIKKE_SR\.html/);
-  assert.match(workflow, /dist\/downloads\/NIKKE_SR_EN\.html/);
-  assert.match(workflow, /dist\/downloads\/SHA256SUMS\.txt/);
+  const workflow = await read("workflows/release.yml");
+  assert.ok(workflow.indexOf("EXPECTED_TAG=") < workflow.indexOf("gh release create"));
+  assert.ok(workflow.includes("GITHUB_REF_NAME") && workflow.includes("package.json"));
+  for (const file of ["NIKKE_SR.html", "NIKKE_SR_EN.html", "SHA256SUMS.txt"]) assert.ok(workflow.includes(`dist/downloads/${file}`));
 });

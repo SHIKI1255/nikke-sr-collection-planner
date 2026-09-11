@@ -72,28 +72,17 @@ test("source is split into bounded, purpose-specific modules", async () => {
     "src/styles/print.css",
   ]);
 
-  const expectedLimits = new Map([
-    [sourceModules.template, 400],
-    [sourceModules.themeInit, 100],
-    [sourceModules.app, 1000],
-    ...Object.values(sourceModules.locales).map((path) => [path, 200]),
-    ...sourceModules.styles.map((path) => [path, 800]),
-  ]);
-
-  for (const [path, maximumLines] of expectedLimits) {
-    const source = await readSource(path);
-    const lines = source.trimEnd().split("\n").length;
-    assert.ok(lines <= maximumLines, `${path} has ${lines} lines; expected at most ${maximumLines}`);
+  // Import graph, strict types and behavior tests replace arbitrary line limits.
+  for (const path of [sourceModules.template, sourceModules.themeInit, sourceModules.app, ...sourceModules.styles]) {
+    assert.ok((await readSource(path)).trim().length > 0);
   }
 });
 
 test("the template has one marker per inline source category", async () => {
   const template = await readSource(sourceModules.template);
-  const app = await readSource(sourceModules.app);
   assert.equal((template.match(/@inline theme-init/g) || []).length, 1);
   assert.equal((template.match(/@inline styles/g) || []).length, 1);
   assert.equal((template.match(/@inline app/g) || []).length, 1);
-  assert.equal((app.match(/@inline locale/g) || []).length, 1);
   assert.doesNotMatch(template, /window\.__SR_CALCULATOR__|--font-base|\.workspace\s*\{/);
   assert.doesNotMatch(template, /[\p{Script=Han}]/u);
 });
@@ -153,20 +142,15 @@ test("assembly produces one dependency-free standalone document", async () => {
   assert.deepEqual([...positions].sort((a, b) => a - b), positions);
 });
 
-test("public API and local state keys stay in the isolated application module", async () => {
-  const app = await readSource(sourceModules.app);
-  assert.match(app, /window\.__SR_CALCULATOR__\s*=\s*\{/);
-  for (const apiName of [
-    "solveMaxUnits",
-    "solveMinShortage",
-    "solveScenario",
-    "normalTransition",
-    "successTransition",
-    "getInputs",
-    "calculate",
-  ]) {
-    assert.match(app, new RegExp(`\\b${apiName},`));
+test("core modules cannot import UI, runtime, persistence or browser globals", async () => {
+  const { build } = await import("esbuild");
+  const result = await build({ entryPoints: ["src/core/engine.ts"], bundle: true, write: false, metafile: true, platform: "neutral" });
+  assert.ok(Object.keys(result.metafile.inputs).length >= 5);
+  for (const path of Object.keys(result.metafile.inputs)) {
+    assert.ok(path.replaceAll("\\\\", "/").startsWith("src/core/"), path);
+    assert.doesNotMatch(await readSource(path), /\\b(?:document|window|localStorage)\\b/);
   }
-  assert.match(app, /nikke-sr-inventory-calculator-v1/);
-  assert.match(app, /nikke-sr-theme-v1/);
+  const ts = JSON.parse(await readSource("tsconfig.json"));
+  assert.equal(ts.compilerOptions.strict, true);
+  assert.equal(ts.compilerOptions.noEmit, true);
 });

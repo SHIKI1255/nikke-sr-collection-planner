@@ -30,19 +30,10 @@ test("typography uses one semantic scale with a 12px minimum", () => {
   assert.ok(lineHeightDeclarations.every((value) => value.startsWith("var(--leading-")));
 });
 
-test("circle, triangle and cross share one vector icon geometry", () => {
+test("status vectors share size tokens without duplicate CSS-mask geometry", () => {
   assert.match(styles, /--size-status-icon: 22px;/);
-  assert.match(styles, /\.mark\s*\{[\s\S]*?width: var\(--size-status-icon\);[\s\S]*?height: var\(--size-status-icon\);/);
-  assert.match(styles, /\.mark::before\s*\{[\s\S]*?width: var\(--size-status-icon\);[\s\S]*?height: var\(--size-status-icon\);/);
-  assert.equal((styles.match(/viewBox='0 0 24 24'/g) || []).length, 3);
-  assert.equal((styles.match(/stroke-width='3'/g) || []).length, 3);
-  assert.match(styles, /\.mark\.circle[\s\S]*?--mark-mask:/);
-  assert.match(styles, /\.mark\.triangle[\s\S]*?--mark-mask:/);
-  assert.match(styles, /\.mark\.cross[\s\S]*?--mark-mask:/);
-  assert.doesNotMatch(styles, /content:\s*"△"/);
-  assert.match(styles, /\.print-mark\s*\{[\s\S]*?width: var\(--size-status-icon\);[\s\S]*?height: var\(--size-status-icon\);/);
-  assert.equal((html.match(/<svg class="print-mark" viewBox="0 0 24 24"/g) || []).length, 4);
-  assert.doesNotMatch(html, /class="print-mark"[^>]*>[○△×]/);
+  assert.match(styles, /\.status-icon\s*\{[\s\S]*?width: var\(--size-status-icon\);[\s\S]*?height: var\(--size-status-icon\);/);
+  assert.doesNotMatch(styles, /--mark-mask|data:image\/svg/);
 });
 
 test("select controls reserve space for a consistent custom arrow", () => {

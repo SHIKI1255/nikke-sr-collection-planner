@@ -68,7 +68,7 @@ test("English print mode keeps localized conditions and strategy symbols", async
   await expect(page.locator(".print-summary")).toContainText("Current Calculation Inputs");
   await expect(page.locator(".print-summary")).toContainText("Phase 0 / 0 EXP");
   await expect(page.locator("footer.page-footer")).toContainText("Data baseline: 2026-07-29");
-  const printMark = page.locator(".policy-table .print-mark").first();
+  const printMark = page.locator(".policy-table .status-icon").first();
   await expect(printMark).toHaveCSS("display", "block");
 });
 
