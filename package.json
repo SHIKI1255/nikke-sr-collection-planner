@@ -14,7 +14,7 @@
     "check": "npm run typecheck && npm run test && npm run test:browser"
   },
   "devDependencies": {
-    "@playwright/test": "1.63.0",
+    "@playwright/test": "1.64.1",
     "esbuild": "0.28.2",
     "typescript": "7.0.2"
   },
