@@ -95,35 +95,75 @@ export function dualMaster(policies: PolicyRecord[], active: number[]) {
     }
   }
 
-  let best = { lambda: candidates[0], value: -Infinity };
-  for (const lambda of candidates) {
-    const value = Math.min(...policies.map((policy) => dotActive(lambda, policy.ratios, active)));
-    const balance = active.reduce((sum, index) => sum + lambda[index] * lambda[index], 0);
-    const bestBalance = active.reduce((sum, index) => sum + best.lambda[index] * best.lambda[index], 0);
-    if (value > best.value + 1e-10 || (Math.abs(value - best.value) <= 1e-10 && balance < bestBalance)) {
-      best = { lambda, value };
+  let bestLambda = candidates[0];
+  let bestValue = -Infinity;
+  let bestBalance = Infinity;
+  const activeLen = active.length;
+  for (let c = 0; c < candidates.length; c += 1) {
+    const lambda = candidates[c];
+    let value = Infinity;
+    const threshold = bestValue - 1e-10;
+    for (let p = 0; p < policies.length; p += 1) {
+      const ratios = policies[p].ratios;
+      let dot = 0;
+      for (let k = 0; k < activeLen; k += 1) {
+        const idx = active[k];
+        dot += lambda[idx] * ratios[idx];
+      }
+      if (dot < value) {
+        value = dot;
+        if (value < threshold) break;
+      }
+    }
+    if (value < threshold) continue;
+    let balance = 0;
+    for (let k = 0; k < activeLen; k += 1) {
+      const v = lambda[active[k]];
+      balance += v * v;
+    }
+    if (value > bestValue + 1e-10 || (Math.abs(value - bestValue) <= 1e-10 && balance < bestBalance)) {
+      bestLambda = lambda;
+      bestValue = value;
+      bestBalance = balance;
     }
   }
-  return best;
+  return { lambda: bestLambda, value: bestValue };
 }
 export function bestPolicyMix(policies: PolicyRecord[], active: number[]): PolicyMix | null {
   let best: PolicyMix | null = null;
+  const activeLen = active.length;
   const consider = (indices: number[], weights: number[]) => {
-    if (weights.some((weight) => weight < -1e-8)) return;
-    const sum = weights.reduce((a, b) => a + b, 0);
+    let sum = 0;
+    for (let i = 0; i < weights.length; i += 1) {
+      const weight = weights[i];
+      if (weight < -1e-8) return;
+      sum += weight;
+    }
     if (Math.abs(sum - 1) > 1e-6) return;
-    weights = weights.map((weight) => Math.max(0, weight));
-    const total = weights.reduce((a, b) => a + b, 0);
-    weights = weights.map((weight) => weight / total);
+    let total = 0;
+    const normalized = new Array<number>(weights.length);
+    for (let i = 0; i < weights.length; i += 1) {
+      const w = weights[i] > 0 ? weights[i] : 0;
+      normalized[i] = w;
+      total += w;
+    }
+    for (let i = 0; i < normalized.length; i += 1) normalized[i] /= total;
     const ratios = [0, 0, 0];
-    indices.forEach((policyIndex, position) => {
-      for (const materialIndex of active) {
-        ratios[materialIndex] += weights[position] * policies[policyIndex].ratios[materialIndex];
+    for (let position = 0; position < indices.length; position += 1) {
+      const policyRatios = policies[indices[position]].ratios;
+      const w = normalized[position];
+      for (let k = 0; k < activeLen; k += 1) {
+        const materialIndex = active[k];
+        ratios[materialIndex] += w * policyRatios[materialIndex];
       }
-    });
-    const value = Math.max(...active.map((index) => ratios[index]));
+    }
+    let value = -Infinity;
+    for (let k = 0; k < activeLen; k += 1) {
+      const r = ratios[active[k]];
+      if (r > value) value = r;
+    }
     if (!best || value < best.value - 1e-9) {
-      best = { indices: [...indices], weights: [...weights], value, ratios };
+      best = { indices: [...indices], weights: normalized, value, ratios };
     }
   };
 

@@ -55,11 +55,6 @@ test("page semantics connect descriptions, table headers and busy state", () => 
     assert.match(html, new RegExp(`id="stock-${material}"[^>]+aria-describedby="groups-${material}"`));
   }
   assert.match(html, /class="notice-icon" aria-hidden="true"/);
-
-
-
-
-
   assert.doesNotMatch(html, />Lv\$\{/);
 });
 

@@ -63,7 +63,7 @@
 
 需要Node.js 20或更高版本。
 
-```powershell
+```sh
 npm ci
 npx playwright install chromium
 npm run check
@@ -71,7 +71,7 @@ npm run check
 
 生成GitHub Pages和离线单文件成品：
 
-```powershell
+```sh
 npm run build
 ```
 
@@ -93,22 +93,13 @@ npm run build
 
 架构、扩展方式及兼容约定见 [架构说明](docs/architecture.md)。本地预览和性能对比：
 
-```powershell
+```sh
 npm run preview
 npm run benchmark
 npm run benchmark -- --baseline-ref 4e6cd64
 ```
 
 预览仅监听 `127.0.0.1:4173`；中文路径为 `/`，英文路径为 `/en/`。基准测试每种模式独立运行五次，报告中位数；CPU 降速是本机模拟，不是实测手机性能。对比参数应使用重构前的提交。
-
-## 本次重构
-
-- 保持现有页面、VI、离线能力和历史计算基线；公开计算 API 保持兼容。
-- 修改任一计算条件后，旧结果立即失效，需要点击“计算强化规划”；达到目标不会自动切换到下一目标。
-- 后台计算优先给出当前结果，再生成阶段建议；旧任务不能覆盖新输入，同一请求可复用缓存。
-- 记录与撤销先更新本地状态，再重新计算；自动兼容旧库存，过滤损坏历史。
-- 页面打印按钮等待完整规划；直接使用浏览器打印时，未完成的规划会显示提示而非旧报告。
-- 无可用库存时显示参考策略缺口，不宣称它是“最小缺口”。结果始终是概率期望，不是单次成功保证。
 
 ## 发布
 

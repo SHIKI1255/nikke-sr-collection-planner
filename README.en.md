@@ -63,7 +63,7 @@ The program version tracks application, interface, and build changes. The data b
 
 Node.js 20 or later is required.
 
-```powershell
+```sh
 npm ci
 npx playwright install chromium
 npm run check
@@ -71,7 +71,7 @@ npm run check
 
 Build the GitHub Pages routes and standalone offline files:
 
-```powershell
+```sh
 npm run build
 ```
 
@@ -93,22 +93,13 @@ Rules are sourced from `data/rulesets/`; default inventory comes from `data/scen
 
 See [Architecture and compatibility](docs/architecture.md). Preview and performance commands:
 
-```powershell
+```sh
 npm run preview
 npm run benchmark
 npm run benchmark -- --baseline-ref 4e6cd64
 ```
 
 Preview listens only on `127.0.0.1:4173`, with Chinese at `/` and English at `/en/`. Benchmarks report the median of five independent runs per profile. CPU throttling simulates a slower machine; it is not a physical mobile-device measurement. Compare against a pre-refactor commit.
-
-## Refactor Highlights
-
-- Existing layouts, VI, offline files and historical numerical baselines are preserved. The public calculation API remains compatible.
-- Editing any calculation input invalidates the old plan. Recalculate manually; reaching a target never advances it automatically.
-- Background work produces the current result first, then the Phase tables. Superseded tasks cannot overwrite inputs; identical requests can reuse cached results.
-- Records and undo are saved before recalculation. Legacy inventory is migrated and damaged history entries are discarded.
-- The page's print button waits for a complete plan. Native browser printing shows a warning instead of an incomplete or outdated report.
-- With no usable inventory, the shortage belongs to a reference strategy, not a proven minimum-shortage solution. All results remain probabilistic expectations.
 
 ## Publishing
 

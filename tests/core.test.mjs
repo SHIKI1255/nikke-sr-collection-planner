@@ -5,6 +5,8 @@ import { loadModule } from "../scripts/load-module.mjs";
 
 const { createEngine } = await loadModule("src/core/engine.ts");
 const rules = JSON.parse(await readFile(new URL("../data/rulesets/2026-07-29.json", import.meta.url)));
+const abilityBalance = JSON.parse(await readFile(new URL("../data/scenarios/ability_balance.json", import.meta.url)));
+const soloRaid = JSON.parse(await readFile(new URL("../data/scenarios/solo_raid_box_only.json", import.meta.url)));
 const engine = createEngine(rules);
 const materials = ["R", "SR", "SSR"];
 const close = (a, b, tolerance = 1e-10) => assert.ok(Math.abs(a - b) <= tolerance, `${a} != ${b}`);
@@ -21,10 +23,9 @@ test("production engine preserves all pure-tool audited totals", () => {
 });
 
 test("production optimizer preserves both audited mixed baselines", () => {
-  for (const values of [[27.10472217509205, 8.4090869871621, 3.6927541998417297], [50.36831173851833, 5.24788751975503, 1.9394366920833799]]) {
-    const available = Object.fromEntries(materials.map((m, i) => [m, values[i]]));
+  for (const available of [abilityBalance.expected_groups, soloRaid.expected_plan_groups]) {
     const result = engine.solveMaxUnits({ level: 0, exp: 0 }, 15, available);
-    materials.forEach((m, i) => close(result.perUnit[m], values[i]));
+    materials.forEach((m) => close(result.perUnit[m], available[m]));
     assert.equal(result.raw.converged, true);
   }
 });

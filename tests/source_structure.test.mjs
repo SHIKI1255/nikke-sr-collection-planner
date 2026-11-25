@@ -147,8 +147,8 @@ test("core modules cannot import UI, runtime, persistence or browser globals", a
   const result = await build({ entryPoints: ["src/core/engine.ts"], bundle: true, write: false, metafile: true, platform: "neutral" });
   assert.ok(Object.keys(result.metafile.inputs).length >= 5);
   for (const path of Object.keys(result.metafile.inputs)) {
-    assert.ok(path.replaceAll("\\\\", "/").startsWith("src/core/"), path);
-    assert.doesNotMatch(await readSource(path), /\\b(?:document|window|localStorage)\\b/);
+    assert.ok(path.replaceAll("\\", "/").startsWith("src/core/"), path);
+    assert.doesNotMatch(await readSource(path), /\b(?:document|window|localStorage)\b/);
   }
   const ts = JSON.parse(await readSource("tsconfig.json"));
   assert.equal(ts.compilerOptions.strict, true);

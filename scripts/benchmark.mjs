@@ -1,4 +1,5 @@
 import { chromium } from "@playwright/test";
+import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { execFileSync } from "node:child_process";
@@ -6,6 +7,10 @@ import { mkdir, writeFile } from "node:fs/promises";
 
 const builds = [{ name: "current", path: resolve("dist/index.html") }];
 const refIndex = process.argv.indexOf("--baseline-ref");
+const outDirIndex = process.argv.indexOf("--out-dir");
+const baselineDir = outDirIndex >= 0 && process.argv[outDirIndex + 1] && !process.argv[outDirIndex + 1].startsWith("-")
+  ? resolve(process.argv[outDirIndex + 1])
+  : resolve(tmpdir(), "nikke-sr-collection-planner-benchmark");
 if (refIndex >= 0) {
   const ref = process.argv[refIndex + 1];
   if (!ref || ref.startsWith("-")) throw new Error("Specify a pre-refactor commit after --baseline-ref");
@@ -19,9 +24,8 @@ if (refIndex >= 0) {
   const css = ["tokens", "base", "components", "results", "policy", "responsive", "print"].map((name) => source(`src/styles/${name}.css`).trim()).join("\n\n");
   const app = source("src/scripts/app.js").replace("/* @inline locale */", () => JSON.stringify(messages).replaceAll("<", "\\u003c"));
   html = html.replace("/* @inline styles */", () => css).replace("/* @inline theme-init */", () => source("src/scripts/theme-init.js").trimEnd()).replace("/* @inline app */", () => app.trimEnd());
-  const directory = resolve(".cache/benchmark");
-  await mkdir(directory, { recursive: true });
-  const path = resolve(directory, `${sha}.html`);
+  await mkdir(baselineDir, { recursive: true });
+  const path = resolve(baselineDir, `${sha}.html`);
   await writeFile(path, html, "utf8");
   builds.unshift({ name: `baseline:${sha}`, path });
 }

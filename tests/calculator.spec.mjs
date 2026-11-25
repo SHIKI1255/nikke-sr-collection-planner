@@ -1,8 +1,11 @@
 import { expect, test } from "@playwright/test";
+import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 
 const pageUrl = pathToFileURL(resolve("dist/index.html")).href;
+const abilityBalance = JSON.parse(await readFile(new URL("../data/scenarios/ability_balance.json", import.meta.url), "utf8"));
+const soloRaid = JSON.parse(await readFile(new URL("../data/scenarios/solo_raid_box_only.json", import.meta.url), "utf8"));
 
 test.beforeEach(async ({ page }) => {
   await page.goto(pageUrl);
@@ -22,35 +25,19 @@ test("loads the formal public interface and default example", async ({ page }) =
 });
 
 test("reproduces the two audited optimization baselines", async ({ page }) => {
-  const result = await page.evaluate(() => {
+  const expectedBalance = abilityBalance.expected_groups;
+  const expectedRaid = soloRaid.expected_plan_groups;
+  const result = await page.evaluate(({ expectedBalance, expectedRaid }) => {
     const api = window.__SR_CALCULATOR__;
-    const balance = api.solveMaxUnits(
-      { level: 0, exp: 0 },
-      15,
-      {
-        R: 27.10472217509205,
-        SR: 8.4090869871621,
-        SSR: 3.6927541998417297,
-      },
-    );
-    const raid = api.solveMaxUnits(
-      { level: 0, exp: 0 },
-      15,
-      {
-        R: 50.36831173851833,
-        SR: 5.24788751975503,
-        SSR: 1.9394366920833799,
-      },
-    );
+    const balance = api.solveMaxUnits({ level: 0, exp: 0 }, 15, expectedBalance);
+    const raid = api.solveMaxUnits({ level: 0, exp: 0 }, 15, expectedRaid);
     return { balance: balance.perUnit, raid: raid.perUnit };
-  });
+  }, { expectedBalance, expectedRaid });
 
-  expect(result.balance.R).toBeCloseTo(27.10472217509205, 10);
-  expect(result.balance.SR).toBeCloseTo(8.4090869871621, 10);
-  expect(result.balance.SSR).toBeCloseTo(3.6927541998417297, 10);
-  expect(result.raid.R).toBeCloseTo(50.36831173851833, 10);
-  expect(result.raid.SR).toBeCloseTo(5.24788751975503, 10);
-  expect(result.raid.SSR).toBeCloseTo(1.9394366920833799, 10);
+  for (const m of ["R", "SR", "SSR"]) {
+    expect(result.balance[m]).toBeCloseTo(expectedBalance[m], 10);
+    expect(result.raid[m]).toBeCloseTo(expectedRaid[m], 10);
+  }
 });
 
 test("records a normal result and can undo it", async ({ page }) => {
